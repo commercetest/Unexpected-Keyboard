@@ -463,6 +463,76 @@ public class TouchInstrumentation
   }
 
   /**
+   * Export/copy the log file to external cache directory for easy access via adb pull.
+   * Returns the path to the exported file, or null on error.
+   */
+  public static String exportLogFile()
+  {
+    TouchInstrumentation inst = getInstance();
+    if (inst._context == null)
+    {
+      Log.e(TAG, "Cannot export: context is null");
+      return null;
+    }
+
+    // Flush current log writer
+    if (inst._logWriter != null)
+    {
+      try
+      {
+        inst._logWriter.flush();
+      }
+      catch (IOException e)
+      {
+        Log.e(TAG, "Error flushing log before export", e);
+      }
+    }
+
+    // Source file (internal cache)
+    File sourceFile = inst._logFile;
+    if (sourceFile == null || !sourceFile.exists())
+    {
+      Log.e(TAG, "No log file to export");
+      return null;
+    }
+
+    // Destination file (external cache - accessible via adb pull)
+    File externalCache = inst._context.getExternalCacheDir();
+    if (externalCache == null)
+    {
+      Log.e(TAG, "External cache directory not available");
+      return null;
+    }
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US);
+    String timestamp = sdf.format(new Date());
+    File destFile = new File(externalCache, "touch_instrumentation_" + timestamp + ".log");
+
+    // Copy file
+    try
+    {
+      java.io.FileInputStream in = new java.io.FileInputStream(sourceFile);
+      java.io.FileOutputStream out = new java.io.FileOutputStream(destFile);
+      byte[] buffer = new byte[8192];
+      int bytesRead;
+      while ((bytesRead = in.read(buffer)) != -1)
+      {
+        out.write(buffer, 0, bytesRead);
+      }
+      in.close();
+      out.close();
+
+      Log.i(TAG, "Log file exported to: " + destFile.getAbsolutePath());
+      return destFile.getAbsolutePath();
+    }
+    catch (IOException e)
+    {
+      Log.e(TAG, "Error exporting log file", e);
+      return null;
+    }
+  }
+
+  /**
    * Get session statistics
    */
   public static String getSessionStats()

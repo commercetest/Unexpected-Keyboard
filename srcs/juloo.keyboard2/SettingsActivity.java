@@ -4,8 +4,10 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 public class SettingsActivity extends PreferenceActivity
 {
@@ -31,6 +33,33 @@ public class SettingsActivity extends PreferenceActivity
     findPreference("horizontal_margin_landscape_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_unfolded").setEnabled(foldableDevice);
     findPreference("keyboard_height_landscape_unfolded").setEnabled(foldableDevice);
+
+    // Setup export log button
+    Preference exportPref = findPreference("instrumentation_export");
+    if (exportPref != null)
+    {
+      exportPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
+      {
+        @Override
+        public boolean onPreferenceClick(Preference preference)
+        {
+          String exportedPath = TouchInstrumentation.exportLogFile();
+          if (exportedPath != null)
+          {
+            Toast.makeText(SettingsActivity.this,
+                "Log exported to:\n" + exportedPath,
+                Toast.LENGTH_LONG).show();
+          }
+          else
+          {
+            Toast.makeText(SettingsActivity.this,
+                "Failed to export log. Check logcat for details.",
+                Toast.LENGTH_LONG).show();
+          }
+          return true;
+        }
+      });
+    }
   }
 
   void fallbackEncrypted()

@@ -66,5 +66,6 @@
     <CheckBoxPreference android:key="instrumentation_enabled" android:title="@string/pref_instrumentation_enabled_title" android:summary="@string/pref_instrumentation_enabled_summary" android:defaultValue="false"/>
     <ListPreference android:key="instrumentation_mode" android:dependency="instrumentation_enabled" android:title="@string/pref_instrumentation_mode_title" android:summary="%s" android:defaultValue="LOGCAT" android:entries="@array/pref_instrumentation_mode_entries" android:entryValues="@array/pref_instrumentation_mode_values"/>
     <ListPreference android:key="instrumentation_verbosity" android:dependency="instrumentation_enabled" android:title="@string/pref_instrumentation_verbosity_title" android:summary="%s" android:defaultValue="STANDARD" android:entries="@array/pref_instrumentation_verbosity_entries" android:entryValues="@array/pref_instrumentation_verbosity_values"/>
+    <Preference android:key="instrumentation_export" android:title="@string/pref_instrumentation_export_title" android:summary="@string/pref_instrumentation_export_summary"/>
   </PreferenceCategory>
 </PreferenceScreen>
