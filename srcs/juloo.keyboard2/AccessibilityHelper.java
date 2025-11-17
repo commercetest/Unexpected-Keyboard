@@ -274,9 +274,20 @@ public class AccessibilityHelper
   private String buildSwipeOptionsAnnouncement(KeyboardData.Key key)
   {
     // Direction names corresponding to key.keys indices 1-8
+    // Based on the layout diagram:
+    //  1 7 2
+    //  5 0 6
+    //  3 8 4
+    // Where 1=nw, 2=ne, 3=sw, 4=se, 5=w, 6=e, 7=n, 8=s
     String[] directionNames = {
-      "up", "up right", "right", "down right",
-      "down", "down left", "left", "up left"
+      "up and left",    // keys[1] = nw
+      "up and right",   // keys[2] = ne
+      "down and left",  // keys[3] = sw
+      "down and right", // keys[4] = se
+      "left",           // keys[5] = w
+      "right",          // keys[6] = e
+      "up",             // keys[7] = n
+      "down"            // keys[8] = s
     };
 
     StringBuilder options = new StringBuilder();
@@ -355,6 +366,38 @@ public class AccessibilityHelper
           case " ": return "space";
           case "\n": return "enter";
           case "\t": return "tab";
+          case "!": return "exclamation";
+          case "\"": return "quote";
+          case "#": return "hash";
+          case "$": return "dollar";
+          case "%": return "percent";
+          case "&": return "ampersand";
+          case "'": return "apostrophe";
+          case "(": return "left parenthesis";
+          case ")": return "right parenthesis";
+          case "*": return "asterisk";
+          case "+": return "plus";
+          case ",": return "comma";
+          case "-": return "minus";
+          case ".": return "period";
+          case "/": return "slash";
+          case ":": return "colon";
+          case ";": return "semicolon";
+          case "<": return "less than";
+          case "=": return "equals";
+          case ">": return "greater than";
+          case "?": return "question mark";
+          case "@": return "at";
+          case "[": return "left bracket";
+          case "\\": return "backslash";
+          case "]": return "right bracket";
+          case "^": return "caret";
+          case "_": return "underscore";
+          case "`": return "backtick";
+          case "{": return "left brace";
+          case "|": return "pipe";
+          case "}": return "right brace";
+          case "~": return "tilde";
           default:
             // For single characters, just return the character
             if (charStr.length() == 1)
@@ -465,13 +508,21 @@ public class AccessibilityHelper
 
   /**
    * Get human-readable direction name
+   * Used for swipe gestures which pass direction as 0-15
    */
   private String getDirectionName(int direction)
   {
-    // Direction is 0-15, convert to 8 main directions
+    // Direction is 0-15 (16 compass points), convert to 8 main directions
+    // The formula maps 16 directions to 8 by grouping pairs
     String[] directions = {
-      "up", "up right", "right", "down right",
-      "down", "down left", "left", "up left"
+      "up",             // n
+      "up and right",   // ne
+      "right",          // e
+      "down and right", // se
+      "down",           // s
+      "down and left",  // sw
+      "left",           // w
+      "up and left"     // nw
     };
 
     int index = (direction + 1) / 2 % 8;
