@@ -202,29 +202,21 @@ public class AccessibilityHelper
 
     if (_verboseMode)
     {
-      // Announce available swipe directions
+      // Build announcement with specific swipe options
       StringBuilder announcement = new StringBuilder(keyName);
-      announcement.append(". ");
 
-      int availableDirections = 0;
-      for (int i = 1; i <= 8; i++)
+      String swipeOptions = buildSwipeOptionsAnnouncement(key);
+      if (!swipeOptions.isEmpty())
       {
-        if (key.keys[i] != null && !key.keys[i].equals(key.keys[0]))
-        {
-          availableDirections++;
-        }
+        announcement.append(". ");
+        announcement.append(swipeOptions);
       }
 
-      if (availableDirections > 0)
-      {
-        announcement.append("Swipe for more options.");
-      }
-
-      announce(view, announcement.toString());
+      announceWithInterrupt(view, announcement.toString());
     }
     else
     {
-      announce(view, keyName);
+      announceWithInterrupt(view, keyName);
     }
   }
 
@@ -249,6 +241,70 @@ public class AccessibilityHelper
     event.setClassName(view.getClass().getName());
     event.setPackageName(view.getContext().getPackageName());
     view.sendAccessibilityEventUnchecked(event);
+  }
+
+  /**
+   * Announce with interruption of previous announcements
+   * Used for hover/focus events where we want immediate feedback
+   */
+  private void announceWithInterrupt(View view, String announcement)
+  {
+    if (view == null || announcement == null || announcement.isEmpty())
+    {
+      return;
+    }
+
+    Log.d(TAG, "Announcing (interrupt): " + announcement);
+
+    // Use TYPE_VIEW_HOVER_ENTER which has higher priority and interrupts previous speech
+    AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+    event.getText().add(announcement);
+    event.setClassName(view.getClass().getName());
+    event.setPackageName(view.getContext().getPackageName());
+    event.setEnabled(true);
+    view.sendAccessibilityEventUnchecked(event);
+
+    // Also use announceForAccessibility as fallback
+    view.announceForAccessibility(announcement);
+  }
+
+  /**
+   * Build announcement listing available swipe options
+   */
+  private String buildSwipeOptionsAnnouncement(KeyboardData.Key key)
+  {
+    // Direction names corresponding to key.keys indices 1-8
+    String[] directionNames = {
+      "up", "up right", "right", "down right",
+      "down", "down left", "left", "up left"
+    };
+
+    StringBuilder options = new StringBuilder();
+    int optionCount = 0;
+
+    // Check each swipe direction
+    for (int i = 1; i <= 8; i++)
+    {
+      if (key.keys[i] != null && !key.keys[i].equals(key.keys[0]))
+      {
+        if (optionCount > 0)
+        {
+          options.append(", ");
+        }
+
+        String direction = directionNames[i - 1];
+        String keyDesc = getKeyDescription(key.keys[i]);
+
+        options.append("swipe ");
+        options.append(direction);
+        options.append(" for ");
+        options.append(keyDesc);
+
+        optionCount++;
+      }
+    }
+
+    return options.toString();
   }
 
   /**
