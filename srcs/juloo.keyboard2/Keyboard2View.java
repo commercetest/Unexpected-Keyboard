@@ -41,6 +41,7 @@ public class Keyboard2View extends View
 
   private Config _config;
   private AccessibilityHelper _accessibilityHelper;
+  private KeyboardData.Key _lastHoveredKey = null;
 
   private float _keyWidth;
   private float _mainLabelSize;
@@ -74,6 +75,10 @@ public class Keyboard2View extends View
     _pointers.setAccessibilityHelper(_accessibilityHelper);
     refresh_navigation_bar(context);
     setOnTouchListener(this);
+    // Enable accessibility
+    setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+    setFocusable(true);
+    setFocusableInTouchMode(false);
     int layout_id = (attrs == null) ? 0 :
       attrs.getAttributeResourceValue(null, "layout", 0);
     if (layout_id == 0)
@@ -117,6 +122,22 @@ public class Keyboard2View extends View
     _compose_key = _keyboard.findKeyWithValue(_compose_kv);
     KeyModifier.set_modmap(_keyboard.modmap);
     reset();
+  }
+
+  @Override
+  public void onInitializeAccessibilityNodeInfo(android.view.accessibility.AccessibilityNodeInfo info)
+  {
+    super.onInitializeAccessibilityNodeInfo(info);
+    if (VERSION.SDK_INT >= 14)
+    {
+      info.setClassName(Keyboard2View.class.getName());
+      info.setContentDescription("Virtual keyboard");
+      // Mark as supporting touch exploration
+      if (VERSION.SDK_INT >= 19)
+      {
+        info.setClickable(true);
+      }
+    }
   }
 
   public void setAccessibilitySettings(boolean enabled, boolean verbose)
@@ -203,6 +224,41 @@ public class Keyboard2View extends View
   {
     _mods = _pointers.getModifiers();
     _config.handler.mods_changed(_mods);
+  }
+
+  @Override
+  public boolean onHoverEvent(MotionEvent event)
+  {
+    // Handle hover events for TalkBack's "explore by touch"
+    if (_accessibilityHelper != null && _accessibilityHelper.isAccessibilityEnabled())
+    {
+      switch (event.getAction())
+      {
+        case MotionEvent.ACTION_HOVER_ENTER:
+        case MotionEvent.ACTION_HOVER_MOVE:
+          float x = event.getX();
+          float y = event.getY();
+          KeyboardData.Key key = getKeyAtPosition(x, y);
+
+          // Only announce if we moved to a different key
+          if (key != null && key != _lastHoveredKey)
+          {
+            _lastHoveredKey = key;
+            _accessibilityHelper.announceKeyFocus(this, key);
+            // Send hover event for accessibility
+            if (VERSION.SDK_INT >= 14)
+            {
+              sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+            }
+          }
+          return true;
+
+        case MotionEvent.ACTION_HOVER_EXIT:
+          _lastHoveredKey = null;
+          return true;
+      }
+    }
+    return super.onHoverEvent(event);
   }
 
   @Override
