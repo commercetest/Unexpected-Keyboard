@@ -71,6 +71,10 @@ public final class Config
   public int circle_sensitivity;
   public boolean clipboard_history_enabled;
   public int clipboard_history_duration;
+  // Touch instrumentation
+  public boolean instrumentation_enabled;
+  public TouchInstrumentation.OutputMode instrumentation_mode;
+  public TouchInstrumentation.VerbosityLevel instrumentation_verbosity;
 
   // Dynamically set
   public boolean shouldOfferVoiceTyping;
@@ -183,6 +187,12 @@ public final class Config
     circle_sensitivity = Integer.valueOf(_prefs.getString("circle_sensitivity", "2"));
     clipboard_history_enabled = _prefs.getBoolean("clipboard_history_enabled", false);
     clipboard_history_duration = Integer.parseInt(_prefs.getString("clipboard_history_duration", "5"));
+    // Touch instrumentation
+    instrumentation_enabled = _prefs.getBoolean("instrumentation_enabled", false);
+    String mode_str = _prefs.getString("instrumentation_mode", "LOGCAT");
+    instrumentation_mode = TouchInstrumentation.OutputMode.valueOf(mode_str);
+    String verbosity_str = _prefs.getString("instrumentation_verbosity", "STANDARD");
+    instrumentation_verbosity = TouchInstrumentation.VerbosityLevel.valueOf(verbosity_str);
 
     float screen_width_dp = dm.widthPixels / dm.density;
     wide_screen = screen_width_dp >= WIDE_DEVICE_THRESHOLD;
@@ -211,6 +221,27 @@ public final class Config
   {
     clipboard_history_enabled = e;
     _prefs.edit().putBoolean("clipboard_history_enabled", e).commit();
+  }
+
+  public void set_instrumentation_enabled(boolean enabled)
+  {
+    instrumentation_enabled = enabled;
+    TouchInstrumentation.setEnabled(enabled);
+    _prefs.edit().putBoolean("instrumentation_enabled", enabled).apply();
+  }
+
+  public void set_instrumentation_mode(TouchInstrumentation.OutputMode mode)
+  {
+    instrumentation_mode = mode;
+    TouchInstrumentation.setOutputMode(mode);
+    _prefs.edit().putString("instrumentation_mode", mode.name()).apply();
+  }
+
+  public void set_instrumentation_verbosity(TouchInstrumentation.VerbosityLevel verbosity)
+  {
+    instrumentation_verbosity = verbosity;
+    TouchInstrumentation.setVerbosity(verbosity);
+    _prefs.edit().putString("instrumentation_verbosity", verbosity.name()).apply();
   }
 
   private float get_dip_pref(DisplayMetrics dm, String pref_name, float def)

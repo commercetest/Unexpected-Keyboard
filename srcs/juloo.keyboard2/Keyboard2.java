@@ -120,6 +120,11 @@ public class Keyboard2 extends InputMethodService
     _keyboardView = (Keyboard2View)inflate_view(R.layout.keyboard);
     _keyboardView.reset();
     Logs.set_debug_logs(getResources().getBoolean(R.bool.debug_logs));
+    TouchInstrumentation.initialize(this);
+    // Apply initial instrumentation settings
+    TouchInstrumentation.setEnabled(_config.instrumentation_enabled);
+    TouchInstrumentation.setOutputMode(_config.instrumentation_mode);
+    TouchInstrumentation.setVerbosity(_config.instrumentation_verbosity);
     ClipboardHistoryService.on_startup(this, _keyeventhandler);
     _foldStateTracker.setChangedCallback(() -> { refresh_config(); });
   }
@@ -247,6 +252,10 @@ public class Keyboard2 extends InputMethodService
     int prev_theme = _config.theme;
     _config.refresh(getResources(), _foldStateTracker.isUnfolded());
     refreshSubtypeImm();
+    // Apply instrumentation settings
+    TouchInstrumentation.setEnabled(_config.instrumentation_enabled);
+    TouchInstrumentation.setOutputMode(_config.instrumentation_mode);
+    TouchInstrumentation.setVerbosity(_config.instrumentation_verbosity);
     // Refreshing the theme config requires re-creating the views
     if (prev_theme != _config.theme)
     {

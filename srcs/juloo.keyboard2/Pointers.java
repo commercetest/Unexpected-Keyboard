@@ -144,6 +144,14 @@ public final class Pointers implements Handler.Callback
     {
       clearLatched();
       ptr.sliding.onTouchUp(ptr);
+      // Instrumentation for sliding mode
+      if (TouchInstrumentation.isEnabled())
+      {
+        android.os.Bundle data = new android.os.Bundle();
+        data.putInt("pointerId", pointerId);
+        data.putString("mode", "sliding");
+        TouchInstrumentation.logEvent(TouchInstrumentation.EventType.TOUCH_UP, data);
+      }
       return;
     }
     stopLongPress(ptr);
@@ -180,11 +188,33 @@ public final class Pointers implements Handler.Callback
       clearLatched();
       removePtr(ptr);
       _handler.onPointerUp(ptr_value, ptr.modifiers);
+
+      // Instrumentation
+      if (TouchInstrumentation.isEnabled())
+      {
+        android.os.Bundle data = new android.os.Bundle();
+        data.putInt("pointerId", pointerId);
+        data.putString("keyValue", ptr_value != null ? ptr_value.toString() : "null");
+        data.putInt("flags", ptr.flags);
+        if (ptr.gesture != null)
+        {
+          data.putString("gesture", ptr.gesture.get_gesture().name());
+        }
+        TouchInstrumentation.logEvent(TouchInstrumentation.EventType.TOUCH_UP, data);
+      }
     }
   }
 
   public void onTouchCancel()
   {
+    // Instrumentation
+    if (TouchInstrumentation.isEnabled())
+    {
+      android.os.Bundle data = new android.os.Bundle();
+      data.putInt("activePointers", _ptrs.size());
+      TouchInstrumentation.logEvent(TouchInstrumentation.EventType.TOUCH_CANCEL, data);
+    }
+
     clear();
     _handler.onPointerFlagsChanged(true);
   }
@@ -213,6 +243,16 @@ public final class Pointers implements Handler.Callback
     _ptrs.add(ptr);
     startLongPress(ptr);
     _handler.onPointerDown(value, false);
+
+    // Instrumentation
+    if (TouchInstrumentation.isEnabled())
+    {
+      android.os.Bundle data = TouchInstrumentation.createTouchBundle(x, y, pointerId);
+      data.putString("keyName", key.keys[0] != null ? key.keys[0].toString() : "null");
+      data.putString("keyValue", value != null ? value.toString() : "null");
+      data.putInt("flags", ptr.flags);
+      TouchInstrumentation.logEvent(TouchInstrumentation.EventType.TOUCH_DOWN, data);
+    }
   }
 
   static final int[] DIRECTION_TO_INDEX = new int[]{
@@ -307,6 +347,19 @@ public final class Pointers implements Handler.Callback
 
           ptr.value = new_value;
           ptr.flags = pointer_flags_of_kv(new_value);
+
+          // Instrumentation for swipe detection
+          if (TouchInstrumentation.isEnabled())
+          {
+            android.os.Bundle data = new android.os.Bundle();
+            data.putInt("pointerId", pointerId);
+            data.putInt("direction", direction);
+            data.putString("baseKey", ptr.key.keys[0] != null ? ptr.key.keys[0].toString() : "null");
+            data.putString("swipeKey", new_value.toString());
+            data.putFloat("distance", dist);
+            TouchInstrumentation.logEvent(TouchInstrumentation.EventType.SWIPE_DETECTED, data);
+          }
+
           // Start sliding mode
           if (new_value.getKind() == KeyValue.Kind.Slider)
             startSliding(ptr, x, y, dx, dy, new_value);
@@ -322,9 +375,22 @@ public final class Pointers implements Handler.Callback
         }
         else
         {
-          ptr.value = apply_gesture(ptr, ptr.gesture.get_gesture());
+          Gesture.Name gestureName = ptr.gesture.get_gesture();
+          ptr.value = apply_gesture(ptr, gestureName);
           restartLongPress(ptr);
           ptr.flags = 0; // Special behaviors are ignored during a gesture.
+
+          // Instrumentation for gesture detection
+          if (TouchInstrumentation.isEnabled())
+          {
+            android.os.Bundle data = new android.os.Bundle();
+            data.putInt("pointerId", pointerId);
+            data.putString("gestureName", gestureName.name());
+            data.putString("baseKey", ptr.key.keys[0] != null ? ptr.key.keys[0].toString() : "null");
+            data.putString("resultValue", ptr.value != null ? ptr.value.toString() : "null");
+            TouchInstrumentation.logEvent(TouchInstrumentation.EventType.GESTURE_DETECTED, data);
+          }
+
           _handler.onPointerFlagsChanged(true); // Vibrate
         }
       }
@@ -435,7 +501,19 @@ public final class Pointers implements Handler.Callback
     if ((ptr.flags & FLAG_P_LATCHABLE) != 0)
     {
       if (!ptr.hasFlagsAny(FLAG_P_CANT_LOCK))
+      {
         lockPointer(ptr, true);
+
+        // Instrumentation
+        if (TouchInstrumentation.isEnabled())
+        {
+          android.os.Bundle data = new android.os.Bundle();
+          data.putInt("pointerId", ptr.pointerId);
+          data.putString("keyValue", ptr.value != null ? ptr.value.toString() : "null");
+          data.putString("action", "lock");
+          TouchInstrumentation.logEvent(TouchInstrumentation.EventType.LONG_PRESS, data);
+        }
+      }
       return;
     }
     // Latched key, no key
@@ -447,6 +525,16 @@ public final class Pointers implements Handler.Callback
     {
       ptr.value = kv;
       _handler.onPointerDown(kv, true);
+
+      // Instrumentation
+      if (TouchInstrumentation.isEnabled())
+      {
+        android.os.Bundle data = new android.os.Bundle();
+        data.putInt("pointerId", ptr.pointerId);
+        data.putString("keyValue", kv.toString());
+        data.putString("action", "alternate");
+        TouchInstrumentation.logEvent(TouchInstrumentation.EventType.LONG_PRESS, data);
+      }
       return;
     }
     // Special keys
@@ -458,6 +546,16 @@ public final class Pointers implements Handler.Callback
       _handler.onPointerHold(kv, ptr.modifiers);
       _longpress_handler.sendEmptyMessageDelayed(ptr.timeoutWhat,
           _config.longPressInterval);
+
+      // Instrumentation (only log first repeat, not subsequent ones)
+      if (TouchInstrumentation.isEnabled() && TouchInstrumentation.getVerbosity() == TouchInstrumentation.VerbosityLevel.VERBOSE)
+      {
+        android.os.Bundle data = new android.os.Bundle();
+        data.putInt("pointerId", ptr.pointerId);
+        data.putString("keyValue", kv.toString());
+        data.putString("action", "repeat");
+        TouchInstrumentation.logEvent(TouchInstrumentation.EventType.LONG_PRESS, data);
+      }
     }
   }
 

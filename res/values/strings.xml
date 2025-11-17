@@ -149,4 +149,9 @@
     <string name="pref_clipboard_history_duration_5">At most 5 minutes</string>
     <string name="pref_clipboard_history_duration_30">At most 30 minutes</string>
     <string name="pref_clipboard_history_duration_stop">Until the app stops</string>
+    <string name="pref_category_developer">Developer options</string>
+    <string name="pref_instrumentation_enabled_title">Enable touch instrumentation</string>
+    <string name="pref_instrumentation_enabled_summary">Log touch events and gestures for testing and debugging</string>
+    <string name="pref_instrumentation_mode_title">Instrumentation output mode</string>
+    <string name="pref_instrumentation_verbosity_title">Instrumentation verbosity</string>
 </resources>
