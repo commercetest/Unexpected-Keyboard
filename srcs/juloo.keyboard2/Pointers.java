@@ -28,12 +28,19 @@ public final class Pointers implements Handler.Callback
   private ArrayList<Pointer> _ptrs = new ArrayList<Pointer>();
   private IPointerEventHandler _handler;
   private Config _config;
+  private AccessibilityHelper _accessibilityHelper;
 
   public Pointers(IPointerEventHandler h, Config c)
   {
     _longpress_handler = new Handler(this);
     _handler = h;
     _config = c;
+    _accessibilityHelper = null; // Will be set by setAccessibilityHelper
+  }
+
+  public void setAccessibilityHelper(AccessibilityHelper helper)
+  {
+    _accessibilityHelper = helper;
   }
 
   /** Return the list of modifiers currently activated. */
@@ -188,6 +195,22 @@ public final class Pointers implements Handler.Callback
       clearLatched();
       removePtr(ptr);
       _handler.onPointerUp(ptr_value, ptr.modifiers);
+
+      // Accessibility announcement
+      if (_accessibilityHelper != null && _handler instanceof android.view.View)
+      {
+        android.view.View view = (android.view.View) _handler;
+        if (ptr.gesture != null && ptr.gesture.get_gesture() != Gesture.Name.None)
+        {
+          // Gesture was used
+          _accessibilityHelper.announceGesture(view, ptr.gesture.get_gesture(), ptr_value);
+        }
+        else
+        {
+          // Regular key press
+          _accessibilityHelper.announceKeyPress(view, ptr_value, ptr.modifiers);
+        }
+      }
 
       // Instrumentation
       if (TouchInstrumentation.isEnabled())
@@ -348,6 +371,13 @@ public final class Pointers implements Handler.Callback
           ptr.value = new_value;
           ptr.flags = pointer_flags_of_kv(new_value);
 
+          // Accessibility announcement for swipe
+          if (_accessibilityHelper != null && _handler instanceof android.view.View)
+          {
+            android.view.View view = (android.view.View) _handler;
+            _accessibilityHelper.announceSwipe(view, ptr.key, new_value, direction);
+          }
+
           // Instrumentation for swipe detection
           if (TouchInstrumentation.isEnabled())
           {
@@ -504,6 +534,13 @@ public final class Pointers implements Handler.Callback
       {
         lockPointer(ptr, true);
 
+        // Accessibility announcement
+        if (_accessibilityHelper != null && _handler instanceof android.view.View)
+        {
+          android.view.View view = (android.view.View) _handler;
+          _accessibilityHelper.announceLongPress(view, ptr.value, "lock");
+        }
+
         // Instrumentation
         if (TouchInstrumentation.isEnabled())
         {
@@ -525,6 +562,13 @@ public final class Pointers implements Handler.Callback
     {
       ptr.value = kv;
       _handler.onPointerDown(kv, true);
+
+      // Accessibility announcement
+      if (_accessibilityHelper != null && _handler instanceof android.view.View)
+      {
+        android.view.View view = (android.view.View) _handler;
+        _accessibilityHelper.announceLongPress(view, kv, "alternate");
+      }
 
       // Instrumentation
       if (TouchInstrumentation.isEnabled())

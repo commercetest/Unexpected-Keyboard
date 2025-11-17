@@ -75,6 +75,9 @@ public final class Config
   public boolean instrumentation_enabled;
   public TouchInstrumentation.OutputMode instrumentation_mode;
   public TouchInstrumentation.VerbosityLevel instrumentation_verbosity;
+  // Accessibility
+  public boolean accessibility_enabled;
+  public boolean accessibility_verbose;
 
   // Dynamically set
   public boolean shouldOfferVoiceTyping;
@@ -193,6 +196,9 @@ public final class Config
     instrumentation_mode = TouchInstrumentation.OutputMode.valueOf(mode_str);
     String verbosity_str = _prefs.getString("instrumentation_verbosity", "STANDARD");
     instrumentation_verbosity = TouchInstrumentation.VerbosityLevel.valueOf(verbosity_str);
+    // Accessibility
+    accessibility_enabled = _prefs.getBoolean("accessibility_enabled", true);
+    accessibility_verbose = _prefs.getBoolean("accessibility_verbose", false);
 
     float screen_width_dp = dm.widthPixels / dm.density;
     wide_screen = screen_width_dp >= WIDE_DEVICE_THRESHOLD;

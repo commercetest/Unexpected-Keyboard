@@ -125,6 +125,8 @@ public class Keyboard2 extends InputMethodService
     TouchInstrumentation.setEnabled(_config.instrumentation_enabled);
     TouchInstrumentation.setOutputMode(_config.instrumentation_mode);
     TouchInstrumentation.setVerbosity(_config.instrumentation_verbosity);
+    // Apply initial accessibility settings
+    _keyboardView.setAccessibilitySettings(_config.accessibility_enabled, _config.accessibility_verbose);
     ClipboardHistoryService.on_startup(this, _keyeventhandler);
     _foldStateTracker.setChangedCallback(() -> { refresh_config(); });
   }
@@ -256,6 +258,8 @@ public class Keyboard2 extends InputMethodService
     TouchInstrumentation.setEnabled(_config.instrumentation_enabled);
     TouchInstrumentation.setOutputMode(_config.instrumentation_mode);
     TouchInstrumentation.setVerbosity(_config.instrumentation_verbosity);
+    // Apply accessibility settings
+    _keyboardView.setAccessibilitySettings(_config.accessibility_enabled, _config.accessibility_verbose);
     // Refreshing the theme config requires re-creating the views
     if (prev_theme != _config.theme)
     {

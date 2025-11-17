@@ -40,6 +40,7 @@ public class Keyboard2View extends View
   private static int _currentWhat = 0;
 
   private Config _config;
+  private AccessibilityHelper _accessibilityHelper;
 
   private float _keyWidth;
   private float _mainLabelSize;
@@ -69,6 +70,8 @@ public class Keyboard2View extends View
     _theme = new Theme(getContext(), attrs);
     _config = Config.globalConfig();
     _pointers = new Pointers(this, _config);
+    _accessibilityHelper = new AccessibilityHelper(context);
+    _pointers.setAccessibilityHelper(_accessibilityHelper);
     refresh_navigation_bar(context);
     setOnTouchListener(this);
     int layout_id = (attrs == null) ? 0 :
@@ -114,6 +117,15 @@ public class Keyboard2View extends View
     _compose_key = _keyboard.findKeyWithValue(_compose_kv);
     KeyModifier.set_modmap(_keyboard.modmap);
     reset();
+  }
+
+  public void setAccessibilitySettings(boolean enabled, boolean verbose)
+  {
+    if (_accessibilityHelper != null)
+    {
+      _accessibilityHelper.setEnabled(enabled);
+      _accessibilityHelper.setVerboseMode(verbose);
+    }
   }
 
   public void reset()
