@@ -173,11 +173,11 @@ public final class Pointers implements Handler.Callback
     // Notify handler of key up
     _handler.onPointerUp(value, mods);
 
-    // Announce via accessibility
+    // Announce via accessibility (use activation announcement for double-tap)
     if (_accessibilityHelper != null && _handler instanceof android.view.View)
     {
       android.view.View view = (android.view.View) _handler;
-      _accessibilityHelper.announceKeyPress(view, value, mods);
+      _accessibilityHelper.announceKeyActivation(view, value, mods);
     }
 
     // Instrumentation logging

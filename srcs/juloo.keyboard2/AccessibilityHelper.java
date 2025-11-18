@@ -75,6 +75,20 @@ public class AccessibilityHelper
   }
 
   /**
+   * Announce a key activation (double-tap selection) to accessibility services
+   */
+  public void announceKeyActivation(View view, KeyValue key, Pointers.Modifiers modifiers)
+  {
+    if (!_enabled || !isAccessibilityEnabled() || key == null)
+    {
+      return;
+    }
+
+    String announcement = buildKeyActivationAnnouncement(key, modifiers);
+    announce(view, announcement);
+  }
+
+  /**
    * Announce a swipe gesture to accessibility services
    */
   public void announceSwipe(View view, KeyboardData.Key baseKey, KeyValue targetKey, int direction)
@@ -346,6 +360,60 @@ public class AccessibilityHelper
   }
 
   /**
+   * Build announcement for key activation (double-tap)
+   * Adds "selected" suffix for most keys, special handling for delete keys
+   */
+  private String buildKeyActivationAnnouncement(KeyValue key, Pointers.Modifiers modifiers)
+  {
+    StringBuilder announcement = new StringBuilder();
+
+    // Announce active modifiers
+    if (modifiers != null && modifiers.size() > 0)
+    {
+      for (int i = 0; i < modifiers.size(); i++)
+      {
+        KeyValue mod = modifiers.get(i);
+        if (mod.getKind() == KeyValue.Kind.Modifier)
+        {
+          announcement.append(getModifierName(mod.getModifier()));
+          announcement.append(" ");
+        }
+      }
+    }
+
+    // Check if this is a delete/backspace key
+    boolean isDelete = false;
+    if (key.getKind() == KeyValue.Kind.Keyevent)
+    {
+      int keycode = key.getKeyevent();
+      if (keycode == android.view.KeyEvent.KEYCODE_DEL ||
+          keycode == android.view.KeyEvent.KEYCODE_FORWARD_DEL)
+      {
+        isDelete = true;
+      }
+    }
+    else if (key.getKind() == KeyValue.Kind.Editing)
+    {
+      isDelete = true; // DELETE_WORD, FORWARD_DELETE_WORD
+    }
+
+    // Announce the key with appropriate suffix
+    String keyDesc = getKeyDescription(key);
+    announcement.append(keyDesc);
+
+    if (isDelete)
+    {
+      announcement.append(", deleted");
+    }
+    else
+    {
+      announcement.append(", selected");
+    }
+
+    return announcement.toString();
+  }
+
+  /**
    * Get a human-readable description of a key
    */
   private String getKeyDescription(KeyValue key)
@@ -363,7 +431,7 @@ public class AccessibilityHelper
         // Special character descriptions
         switch (charStr)
         {
-          case " ": return "space";
+          case " ": return "space bar";
           case "\n": return "enter";
           case "\t": return "tab";
           case "!": return "exclamation";
@@ -476,7 +544,17 @@ public class AccessibilityHelper
         return key.getString();
 
       case Slider:
-        return "slider " + key.getSlider().toString();
+        KeyValue.Slider slider = key.getSlider();
+        switch (slider)
+        {
+          case Cursor_left: return "move cursor left";
+          case Cursor_right: return "move cursor right";
+          case Cursor_up: return "move cursor up";
+          case Cursor_down: return "move cursor down";
+          case Selection_cursor_left: return "select left";
+          case Selection_cursor_right: return "select right";
+          default: return "slider " + slider.toString();
+        }
 
       case Macro:
         return "macro";
