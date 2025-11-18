@@ -41,6 +41,7 @@ public class Keyboard2View extends View
 
   private Config _config;
   private AccessibilityHelper _accessibilityHelper;
+  private KeyboardAccessibilityDelegate _accessibilityDelegate;
   private KeyboardData.Key _lastHoveredKey = null;
 
   private float _keyWidth;
@@ -73,12 +74,24 @@ public class Keyboard2View extends View
     _pointers = new Pointers(this, _config);
     _accessibilityHelper = new AccessibilityHelper(context);
     _pointers.setAccessibilityHelper(_accessibilityHelper);
+    _accessibilityDelegate = new KeyboardAccessibilityDelegate(this, _accessibilityHelper);
     refresh_navigation_bar(context);
     setOnTouchListener(this);
     // Enable accessibility
     setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
     setFocusable(true);
     setFocusableInTouchMode(false);
+    // Set accessibility delegate for virtual view navigation
+    if (VERSION.SDK_INT >= 16)
+    {
+      setAccessibilityDelegate(new android.view.View.AccessibilityDelegate() {
+        @Override
+        public android.view.accessibility.AccessibilityNodeProvider getAccessibilityNodeProvider(View host)
+        {
+          return _accessibilityDelegate;
+        }
+      });
+    }
     int layout_id = (attrs == null) ? 0 :
       attrs.getAttributeResourceValue(null, "layout", 0);
     if (layout_id == 0)
@@ -238,17 +251,29 @@ public class Keyboard2View extends View
         case MotionEvent.ACTION_HOVER_MOVE:
           float x = event.getX();
           float y = event.getY();
-          KeyboardData.Key key = getKeyAtPosition(x, y);
 
-          // Only announce if we moved to a different key
-          if (key != null && key != _lastHoveredKey)
+          // For API 16+, use virtual view navigation
+          if (VERSION.SDK_INT >= 16 && _accessibilityDelegate != null)
           {
-            _lastHoveredKey = key;
-            _accessibilityHelper.announceKeyFocus(this, key);
-            // Send hover event for accessibility
-            if (VERSION.SDK_INT >= 14)
+            int virtualViewId = _accessibilityDelegate.getVirtualViewIdAt(x, y);
+            if (virtualViewId != Integer.MIN_VALUE)
             {
-              sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+              _accessibilityDelegate.notifyAccessibilityFocusChanged(virtualViewId);
+              return true;
+            }
+          }
+          else
+          {
+            // Fallback for older API levels
+            KeyboardData.Key key = getKeyAtPosition(x, y);
+            if (key != null && key != _lastHoveredKey)
+            {
+              _lastHoveredKey = key;
+              _accessibilityHelper.announceKeyFocus(this, key);
+              if (VERSION.SDK_INT >= 14)
+              {
+                sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
+              }
             }
           }
           return true;
@@ -357,6 +382,15 @@ public class Keyboard2View extends View
       (int)(_tc.row_height * _keyboard.keysHeight
           + _config.marginTop + _marginBottom);
     setMeasuredDimension(width, height);
+
+    // Update accessibility delegate with new measurements
+    if (_accessibilityDelegate != null && _tc != null)
+    {
+      _accessibilityDelegate.setKeyboardData(
+        _keyboard, _keyWidth, _marginLeft, _tc.margin_top,
+        _tc.row_height, _tc.horizontal_margin, _tc.vertical_margin
+      );
+    }
   }
 
   @Override
