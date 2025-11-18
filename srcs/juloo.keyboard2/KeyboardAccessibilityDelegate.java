@@ -264,9 +264,14 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
         return true;
 
       case AccessibilityNodeInfo.ACTION_CLICK:
-        // Note: Actual key press is handled by touch events
-        // This is just for accessibility focus navigation
-        Log.d(TAG, "Click action on virtual view " + virtualViewId);
+        // Perform actual key press when user double-taps in TalkBack
+        Log.d(TAG, "Click action on virtual view " + virtualViewId + ", performing key press");
+
+        // Cast view to Keyboard2View to access performAccessibilityKeyPress
+        if (_view instanceof Keyboard2View)
+        {
+          ((Keyboard2View)_view).performAccessibilityKeyPress(keyInfo.key);
+        }
         return true;
 
       default:

@@ -162,6 +162,17 @@ public class Keyboard2View extends View
     }
   }
 
+  /**
+   * Perform a key press programmatically for accessibility (e.g., TalkBack double-tap)
+   */
+  public void performAccessibilityKeyPress(KeyboardData.Key key)
+  {
+    if (_pointers != null)
+    {
+      _pointers.performAccessibilityKeyPress(key);
+    }
+  }
+
   public void reset()
   {
     _mods = Pointers.Modifiers.EMPTY;

@@ -140,6 +140,56 @@ public final class Pointers implements Handler.Callback
     }
   }
 
+  /**
+   * Simulate a key press for accessibility (e.g., TalkBack double-tap).
+   * This performs a complete down-up sequence programmatically.
+   */
+  public void performAccessibilityKeyPress(KeyboardData.Key key)
+  {
+    if (key == null || key.keys[0] == null)
+      return;
+
+    // Create a temporary pointer ID for this simulated press
+    int tempPointerId = -1000; // Use negative ID to avoid conflicts
+
+    // Get the key value (use modifyKey like normal touch flow)
+    KeyValue kv = _handler.modifyKey(key.keys[0], getModifiers());
+    if (kv == null)
+      return;
+
+    // Simulate pointer down
+    int flags = pointer_flags_of_kv(kv);
+    Pointer ptr = new Pointer(tempPointerId, key, kv, 0.f, 0.f, getModifiers(), flags);
+    _ptrs.add(ptr);
+
+    // Notify handler of key down
+    _handler.onPointerDown(kv, false);
+
+    // Immediately simulate pointer up (no delay like normal touch)
+    KeyValue value = ptr.value;
+    Modifiers mods = ptr.modifiers;
+    removePtr(ptr);
+
+    // Notify handler of key up
+    _handler.onPointerUp(value, mods);
+
+    // Announce via accessibility
+    if (_accessibilityHelper != null && _handler instanceof android.view.View)
+    {
+      android.view.View view = (android.view.View) _handler;
+      _accessibilityHelper.announceKeyPress(view, value, mods);
+    }
+
+    // Instrumentation logging
+    if (TouchInstrumentation.isEnabled())
+    {
+      android.os.Bundle data = new android.os.Bundle();
+      data.putString("source", "accessibility");
+      data.putString("key", value.toString());
+      TouchInstrumentation.logEvent(TouchInstrumentation.EventType.TOUCH_UP, data);
+    }
+  }
+
   // Receiving events
 
   public void onTouchUp(int pointerId)
