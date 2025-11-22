@@ -145,11 +145,6 @@ public class Keyboard2View extends View
     {
       info.setClassName(Keyboard2View.class.getName());
       info.setContentDescription("Virtual keyboard");
-      // Mark as supporting touch exploration
-      if (VERSION.SDK_INT >= 19)
-      {
-        info.setClickable(true);
-      }
     }
   }
 
@@ -267,10 +262,8 @@ public class Keyboard2View extends View
           if (VERSION.SDK_INT >= 16 && _accessibilityDelegate != null)
           {
             int virtualViewId = _accessibilityDelegate.getVirtualViewIdAt(x, y);
-            if (virtualViewId != Integer.MIN_VALUE)
-            {
+            if (virtualViewId != Integer.MIN_VALUE) {
               _accessibilityDelegate.notifyAccessibilityFocusChanged(virtualViewId);
-              return true;
             }
           }
           else
@@ -291,6 +284,9 @@ public class Keyboard2View extends View
 
         case MotionEvent.ACTION_HOVER_EXIT:
           _lastHoveredKey = null;
+          if (_accessibilityDelegate != null) {
+            _accessibilityDelegate.notifyAccessibilityFocusChanged(Integer.MIN_VALUE);
+          }
           return true;
       }
     }
@@ -546,7 +542,7 @@ public class Keyboard2View extends View
     kv = modifyKey(kv, _mods);
     if (kv == null)
       return;
-    float textSize = scaleTextSize(kv, true);
+    float textSize = scaleTextCasing(kv, true);
     Paint p = tc.label_paint(kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT), labelColor(kv, isKeyDown, false), textSize);
     canvas.drawText(kv.getString(), x, (keyH - p.ascent() - p.descent()) / 2f + y, p);
   }
@@ -560,7 +556,7 @@ public class Keyboard2View extends View
     kv = modifyKey(kv, _mods);
     if (kv == null)
       return;
-    float textSize = scaleTextSize(kv, false);
+    float textSize = scaleTextCasing(kv, false);
     Paint p = tc.sublabel_paint(kv.hasFlagsAny(KeyValue.FLAG_KEY_FONT), labelColor(kv, isKeyDown, true), textSize, a);
     float subPadding = _config.keyPadding;
     if (v == Vertical.CENTER)
@@ -590,7 +586,7 @@ public class Keyboard2View extends View
         x + keyW / 2f, (keyH - p.ascent() - p.descent()) * 4/5 + y, p);
   }
 
-  private float scaleTextSize(KeyValue k, boolean main_label)
+  private float scaleTextCasing(KeyValue k, boolean main_label)
   {
     float smaller_font = k.hasFlagsAny(KeyValue.FLAG_SMALLER_FONT) ? 0.75f : 1.f;
     float label_size = main_label ? _mainLabelSize : _subLabelSize;

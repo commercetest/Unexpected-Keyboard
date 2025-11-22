@@ -423,6 +423,10 @@ public class AccessibilityHelper
       return "unknown";
     }
 
+    if ("\uE00D".equals(key.getString())) {
+        return "space bar";
+    }
+
     switch (key.getKind())
     {
       case Char:
@@ -509,6 +513,7 @@ public class AccessibilityHelper
         {
           case android.view.KeyEvent.KEYCODE_DEL: return "backspace";
           case android.view.KeyEvent.KEYCODE_FORWARD_DEL: return "delete";
+          case android.view.KeyEvent.KEYCODE_ENTER: return "enter";
           case android.view.KeyEvent.KEYCODE_DPAD_LEFT: return "left arrow";
           case android.view.KeyEvent.KEYCODE_DPAD_RIGHT: return "right arrow";
           case android.view.KeyEvent.KEYCODE_DPAD_UP: return "up arrow";
