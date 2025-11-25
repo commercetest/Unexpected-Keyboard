@@ -285,7 +285,7 @@ public class AccessibilityHelper
   /**
    * Build announcement listing available swipe options
    */
-  private String buildSwipeOptionsAnnouncement(KeyboardData.Key key)
+  public String buildSwipeOptionsAnnouncement(KeyboardData.Key key)
   {
     // Direction names corresponding to key.keys indices 1-8
     // Based on the layout diagram:
@@ -322,7 +322,7 @@ public class AccessibilityHelper
 
         options.append("swipe ");
         options.append(direction);
-        options.append(" for ");
+        options.append(getSwipeActionDescription(key.keys[i]));
         options.append(keyDesc);
 
         optionCount++;
@@ -332,10 +332,34 @@ public class AccessibilityHelper
     return options.toString();
   }
 
+  public String getSwipeActionDescription(KeyValue key) {
+      if (key == null) {
+          return "";
+      }
+
+      switch (key.getKind()) {
+          case Char:
+          case String:
+              return " to type ";
+          case Keyevent:
+              switch (key.getKeyevent()) {
+                  case android.view.KeyEvent.KEYCODE_DEL:
+                  case android.view.KeyEvent.KEYCODE_FORWARD_DEL:
+                      return " to delete ";
+                  default:
+                      return " for ";
+              }
+          case Editing:
+              return " to ";
+          default:
+              return " for ";
+      }
+  }
+
   /**
    * Build a descriptive announcement for a key press
    */
-  private String buildKeyAnnouncement(KeyValue key, Pointers.Modifiers modifiers)
+  public String buildKeyAnnouncement(KeyValue key, Pointers.Modifiers modifiers)
   {
     StringBuilder announcement = new StringBuilder();
 
@@ -355,6 +379,9 @@ public class AccessibilityHelper
 
     // Announce the key itself
     announcement.append(getKeyDescription(key));
+    if (key.getKind() == KeyValue.Kind.Char && key.getString().length() > 1) {
+        announcement.append(", long-press for more options");
+    }
 
     return announcement.toString();
   }
@@ -363,7 +390,7 @@ public class AccessibilityHelper
    * Build announcement for key activation (double-tap)
    * Adds "selected" suffix for most keys, special handling for delete keys
    */
-  private String buildKeyActivationAnnouncement(KeyValue key, Pointers.Modifiers modifiers)
+  public String buildKeyActivationAnnouncement(KeyValue key, Pointers.Modifiers modifiers)
   {
     StringBuilder announcement = new StringBuilder();
 
@@ -416,7 +443,7 @@ public class AccessibilityHelper
   /**
    * Get a human-readable description of a key
    */
-  private String getKeyDescription(KeyValue key)
+  public String getKeyDescription(KeyValue key)
   {
     if (key == null)
     {
@@ -576,7 +603,7 @@ public class AccessibilityHelper
   /**
    * Get human-readable modifier name
    */
-  private String getModifierName(KeyValue.Modifier mod)
+  public String getModifierName(KeyValue.Modifier mod)
   {
     switch (mod)
     {
@@ -593,7 +620,7 @@ public class AccessibilityHelper
    * Get human-readable direction name
    * Used for swipe gestures which pass direction as 0-15
    */
-  private String getDirectionName(int direction)
+  public String getDirectionName(int direction)
   {
     // Direction is 0-15 (16 compass points), convert to 8 main directions
     // The formula maps 16 directions to 8 by grouping pairs
@@ -615,7 +642,7 @@ public class AccessibilityHelper
   /**
    * Get human-readable gesture name
    */
-  private String getGestureName(Gesture.Name gesture)
+  public String getGestureName(Gesture.Name gesture)
   {
     switch (gesture)
     {

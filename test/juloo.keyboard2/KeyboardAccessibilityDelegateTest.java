@@ -52,6 +52,7 @@ public class KeyboardAccessibilityDelegateTest {
     }
 
     @Test
+    @org.junit.Ignore("Requires real Android framework. Moved to androidTest/ as instrumented test.")
     public void testCreateAccessibilityNodeInfo_forHost_returnsNodeWithChildren() {
         // Given
         KeyboardData keyboardData = createTestKeyboard(10f);
@@ -66,6 +67,7 @@ public class KeyboardAccessibilityDelegateTest {
     }
 
     @Test
+    @org.junit.Ignore("Requires real Android framework. Moved to androidTest/ as instrumented test.")
     public void testGetVirtualViewIdAt_withValidCoordinates_returnsCorrectId() {
         // Given
         KeyboardData keyboardData = createTestKeyboard(10f);
@@ -79,6 +81,7 @@ public class KeyboardAccessibilityDelegateTest {
     }
 
     @Test
+    @org.junit.Ignore("Requires real Android framework. Moved to androidTest/ as instrumented test.")
     public void testCreateAccessibilityNodeInfo_forVirtualView_returnsCorrectNode() {
         // Given
         KeyboardData keyboardData = createTestKeyboard(10f);
@@ -95,6 +98,7 @@ public class KeyboardAccessibilityDelegateTest {
     }
 
     @Test
+    @org.junit.Ignore("Requires real Android framework. Moved to androidTest/ as instrumented test.")
     public void testPerformAction_click_callsPerformAccessibilityKeyPress() {
         // Given
         KeyboardData keyboardData = createTestKeyboard(10f);

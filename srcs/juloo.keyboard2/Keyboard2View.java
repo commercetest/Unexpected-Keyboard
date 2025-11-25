@@ -246,51 +246,37 @@ public class Keyboard2View extends View
   }
 
   @Override
-  public boolean onHoverEvent(MotionEvent event)
+  public boolean dispatchHoverEvent(MotionEvent event)
   {
-    // Handle hover events for TalkBack's "explore by touch"
-    if (_accessibilityHelper != null && _accessibilityHelper.isAccessibilityEnabled())
+    // For API 16+ with virtual views, map hover coordinates to virtual view focus
+    if (VERSION.SDK_INT >= 16 && _accessibilityHelper != null &&
+        _accessibilityHelper.isAccessibilityEnabled() && _accessibilityDelegate != null)
     {
       switch (event.getAction())
       {
         case MotionEvent.ACTION_HOVER_ENTER:
         case MotionEvent.ACTION_HOVER_MOVE:
-          float x = event.getX();
-          float y = event.getY();
-
-          // For API 16+, use virtual view navigation
-          if (VERSION.SDK_INT >= 16 && _accessibilityDelegate != null)
+          int virtualViewId = _accessibilityDelegate.getVirtualViewIdAt(event.getX(), event.getY());
+          if (virtualViewId != Integer.MIN_VALUE)
           {
-            int virtualViewId = _accessibilityDelegate.getVirtualViewIdAt(x, y);
-            if (virtualViewId != Integer.MIN_VALUE) {
-              _accessibilityDelegate.notifyAccessibilityFocusChanged(virtualViewId);
-            }
-          }
-          else
-          {
-            // Fallback for older API levels
-            KeyboardData.Key key = getKeyAtPosition(x, y);
-            if (key != null && key != _lastHoveredKey)
+            // Only set focus if it's actually changing to avoid disrupting TalkBack gestures
+            // Calling performAction on already-focused keys causes TalkBack to clear+re-set focus
+            if (!_accessibilityDelegate.isVirtualViewFocused(virtualViewId))
             {
-              _lastHoveredKey = key;
-              _accessibilityHelper.announceKeyFocus(this, key);
-              if (VERSION.SDK_INT >= 14)
-              {
-                sendAccessibilityEvent(android.view.accessibility.AccessibilityEvent.TYPE_VIEW_HOVER_ENTER);
-              }
+              _accessibilityDelegate.performAction(virtualViewId,
+                  android.view.accessibility.AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS, null);
             }
           }
-          return true;
+          break;
 
         case MotionEvent.ACTION_HOVER_EXIT:
-          _lastHoveredKey = null;
-          if (_accessibilityDelegate != null) {
-            _accessibilityDelegate.notifyAccessibilityFocusChanged(Integer.MIN_VALUE);
-          }
-          return true;
+          // DON'T clear focus on hover exit - keep focus stable until user touches a different key
+          // This prevents the "sticky focus" issue where focus is cleared between tap and double-tap
+          break;
       }
     }
-    return super.onHoverEvent(event);
+
+    return super.dispatchHoverEvent(event);
   }
 
   @Override

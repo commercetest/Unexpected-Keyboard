@@ -52,12 +52,16 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
   private static class KeyInfo
   {
     int virtualViewId;
+    int row;
+    int column;
     KeyboardData.Key key;
     Rect bounds;
 
-    KeyInfo(int id, KeyboardData.Key k, Rect b)
+    KeyInfo(int id, int r, int c, KeyboardData.Key k, Rect b)
     {
       virtualViewId = id;
+      row = r;
+      column = c;
       key = k;
       bounds = b;
     }
@@ -100,33 +104,34 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
 
     int virtualViewId = 0;
     float y = _marginTop;
+    int rowCount = _keyboard.rows.size();
 
-    for (KeyboardData.Row row : _keyboard.rows)
-    {
-      y += row.shift * _rowHeight;
-      float x = _marginLeft;
-      float keyH = row.height * _rowHeight - _verticalMargin;
+    for (int r = 0; r < rowCount; r++) {
+        KeyboardData.Row row = _keyboard.rows.get(r);
+        y += row.shift * _rowHeight;
+        float x = _marginLeft;
+        float keyH = row.height * _rowHeight - _verticalMargin;
 
-      for (KeyboardData.Key key : row.keys)
-      {
-        x += key.shift * _keyWidth;
-        float keyW = _keyWidth * key.width - _horizontalMargin;
+        for (int c = 0; c < row.keys.size(); c++) {
+            KeyboardData.Key key = row.keys.get(c);
+            x += key.shift * _keyWidth;
+            float keyW = _keyWidth * key.width - _horizontalMargin;
 
-        // Create bounds for this key
-        Rect bounds = new Rect(
-          (int)x,
-          (int)y,
-          (int)(x + keyW),
-          (int)(y + keyH)
-        );
+            // Create bounds for this key
+            Rect bounds = new Rect(
+              (int)x,
+              (int)y,
+              (int)(x + keyW),
+              (int)(y + keyH)
+            );
 
-        _keyInfoList.add(new KeyInfo(virtualViewId, key, bounds));
-        virtualViewId++;
+            _keyInfoList.add(new KeyInfo(virtualViewId, r, c, key, bounds));
+            virtualViewId++;
 
-        x += key.width * _keyWidth;
-      }
+            x += key.width * _keyWidth;
+        }
 
-      y += row.height * _rowHeight;
+        y += row.height * _rowHeight;
     }
 
     Log.d(TAG, "Built key info list with " + _keyInfoList.size() + " keys");
@@ -163,19 +168,41 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
   @Override
   public AccessibilityNodeInfo createAccessibilityNodeInfo(int virtualViewId)
   {
-    if (Build.VERSION.SDK_INT < 16)
+    Log.d(TAG, "createAccessibilityNodeInfo called for virtualViewId=" + virtualViewId);
+
+    if (Build.VERSION.SDK_INT < 19)
       return null;
 
     if (virtualViewId == HOST_VIEW_ID)
     {
+      Log.d(TAG, "  Creating node for HOST_VIEW, " + _keyInfoList.size() + " children");
       // Info for the host view (the keyboard itself)
       AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain(_view);
+
+      // Initialize from the view itself
       _view.onInitializeAccessibilityNodeInfo(node);
+
+      // Override specific properties for virtual view container
+      // The host view should not be interactive - only children are
+      node.setClickable(false);
+      node.setLongClickable(false);
+      node.setFocusable(false);
 
       // Add all keys as children
       for (KeyInfo info : _keyInfoList)
       {
         node.addChild(_view, info.virtualViewId);
+      }
+
+      // Set collection info
+      int rowCount = _keyboard.rows.size();
+      int colCount = 0;
+      if (rowCount > 0) {
+          colCount = _keyboard.rows.get(0).keys.size();
+      }
+      if (Build.VERSION.SDK_INT >= 19)
+      {
+        node.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(rowCount, colCount, false));
       }
 
       return node;
@@ -184,16 +211,37 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     // Info for a specific key
     KeyInfo keyInfo = getKeyInfo(virtualViewId);
     if (keyInfo == null)
+    {
+      Log.w(TAG, "  KeyInfo is null for virtualViewId=" + virtualViewId);
       return null;
+    }
+
+    Log.d(TAG, "  Creating node for key: " + (keyInfo.key.keys[0] != null ? keyInfo.key.keys[0].toString() : "null"));
 
     AccessibilityNodeInfo node = AccessibilityNodeInfo.obtain(_view, virtualViewId);
     node.setPackageName(_view.getContext().getPackageName());
-    node.setClassName("android.view.View");
+    // Use Button className so TalkBack recognizes this as activatable
+    node.setClassName("android.widget.Button");
     node.setSource(_view, virtualViewId);
+    node.setParent(_view);
 
     // Set bounds in parent coordinates
     Rect bounds = new Rect(keyInfo.bounds);
     node.setBoundsInParent(bounds);
+
+    // Set bounds in screen coordinates (required for TalkBack click handling)
+    if (Build.VERSION.SDK_INT >= 16)
+    {
+      int[] viewLocation = new int[2];
+      _view.getLocationOnScreen(viewLocation);
+      Rect screenBounds = new Rect(
+        bounds.left + viewLocation[0],
+        bounds.top + viewLocation[1],
+        bounds.right + viewLocation[0],
+        bounds.bottom + viewLocation[1]
+      );
+      node.setBoundsInScreen(screenBounds);
+    }
 
     // Set content description
     String description = _accessibilityHelper.getKeyContentDescription(keyInfo.key, null);
@@ -204,9 +252,50 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     node.setClickable(true);
     node.setEnabled(true);
     node.setVisibleToUser(true);
+    node.setScreenReaderFocusable(true);
 
-    if (Build.VERSION.SDK_INT >= 16)
+    // Explicitly mark as important for accessibility
+    if (Build.VERSION.SDK_INT >= 24)
     {
+      node.setImportantForAccessibility(true);
+    }
+
+    // Mark as supporting direct touch for IME keyboards
+    if (Build.VERSION.SDK_INT >= 29)
+    {
+      node.setTouchDelegateInfo(null);  // Ensure no touch delegate interferes
+    }
+
+    // Set collection item info
+    node.setCollectionItemInfo(AccessibilityNodeInfo.CollectionItemInfo.obtain(keyInfo.row, 1, keyInfo.column, 1, false, false));
+
+    // Add standard actions
+    if (Build.VERSION.SDK_INT >= 21)
+    {
+      // Use AccessibilityAction objects for API 21+ so TalkBack recognizes them
+      node.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
+      node.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
+
+      // Add ACTION_CLICK with custom label to make it explicit for IME context
+      String keyDesc = _accessibilityHelper.getKeyDescription(keyInfo.key.keys[0]);
+      node.addAction(new AccessibilityNodeInfo.AccessibilityAction(
+          AccessibilityNodeInfo.ACTION_CLICK,
+          "Type " + keyDesc
+      ));
+
+      // Add custom actions for swipe gestures (use IDs 256+ to avoid conflicts)
+      int actionId = 256;
+      for (int i = 1; i <= 8; i++) {
+          if (keyInfo.key.keys[i] != null && !keyInfo.key.keys[i].equals(keyInfo.key.keys[0])) {
+              String label = "Swipe " + _accessibilityHelper.getDirectionName(i) + " for " + _accessibilityHelper.getKeyDescription(keyInfo.key.keys[i]);
+              node.addAction(new AccessibilityNodeInfo.AccessibilityAction(actionId, label));
+              actionId++;
+          }
+      }
+    }
+    else if (Build.VERSION.SDK_INT >= 16)
+    {
+      // Use integer constants for older APIs
       node.addAction(AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS);
       node.addAction(AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
       node.addAction(AccessibilityNodeInfo.ACTION_CLICK);
@@ -216,11 +305,17 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     if (virtualViewId == _focusedVirtualViewId)
     {
       node.setAccessibilityFocused(true);
+      Log.d(TAG, "  Node has accessibility focus");
     }
     else
     {
       node.setAccessibilityFocused(false);
     }
+
+    Log.d(TAG, "  Node setup complete: clickable=" + node.isClickable() +
+              ", focusable=" + node.isFocusable() +
+              ", enabled=" + node.isEnabled() +
+              ", visibleToUser=" + node.isVisibleToUser());
 
     return node;
   }
@@ -228,17 +323,42 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
   @Override
   public boolean performAction(int virtualViewId, int action, Bundle arguments)
   {
+    String actionName = getActionName(action);
+    Log.d(TAG, "performAction called: virtualViewId=" + virtualViewId + ", action=" + action + " (" + actionName + ")");
+
     if (Build.VERSION.SDK_INT < 16)
       return false;
 
     if (virtualViewId == HOST_VIEW_ID)
     {
-      return _view.performAccessibilityAction(action, arguments);
+      Log.d(TAG, "Action on host view, delegating to view");
+      boolean result = _view.performAccessibilityAction(action, arguments);
+      Log.d(TAG, "Host view action result: " + result);
+      return result;
     }
 
     KeyInfo keyInfo = getKeyInfo(virtualViewId);
     if (keyInfo == null)
+    {
+      Log.w(TAG, "KeyInfo is null for virtualViewId=" + virtualViewId);
       return false;
+    }
+
+    Log.d(TAG, "KeyInfo found for key: " + (keyInfo.key.keys[0] != null ? keyInfo.key.keys[0].toString() : "null"));
+
+    // Handle custom swipe actions (IDs 256-263 map to swipe directions 1-8)
+    if (action >= 256 && action <= 263) {
+        int swipeDirection = action - 255;  // 256->1, 257->2, etc.
+        if (swipeDirection >= 1 && swipeDirection <= 8 && _view instanceof Keyboard2View) {
+            KeyValue targetKv = keyInfo.key.keys[swipeDirection];
+            if (targetKv != null) {
+                Log.d(TAG, "  Custom swipe action " + action + " (direction " + swipeDirection + ")");
+                KeyboardData.Key tempKey = new KeyboardData.Key(new KeyValue[]{targetKv}, null, 0, 1f, 0f, "");
+                ((Keyboard2View) _view).performAccessibilityKeyPress(tempKey);
+            }
+        }
+        return true;
+    }
 
     switch (action)
     {
@@ -265,17 +385,45 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
 
       case AccessibilityNodeInfo.ACTION_CLICK:
         // Perform actual key press when user double-taps in TalkBack
-        Log.d(TAG, "Click action on virtual view " + virtualViewId + ", performing key press");
+        // TalkBack has already determined the correct virtual view based on accessibility focus
+        Log.d(TAG, "ACTION_CLICK on virtual view " + virtualViewId);
+        Log.d(TAG, "  Key: " + (keyInfo.key.keys[0] != null ? keyInfo.key.keys[0].toString() : "null"));
+        Log.d(TAG, "  View is Keyboard2View: " + (_view instanceof Keyboard2View));
 
         // Cast view to Keyboard2View to access performAccessibilityKeyPress
         if (_view instanceof Keyboard2View)
         {
+          Log.d(TAG, "  Calling performAccessibilityKeyPress...");
           ((Keyboard2View)_view).performAccessibilityKeyPress(keyInfo.key);
+          Log.d(TAG, "  performAccessibilityKeyPress completed");
+        }
+        else
+        {
+          Log.e(TAG, "  View is not Keyboard2View! Type: " + _view.getClass().getName());
         }
         return true;
 
       default:
         return false;
+    }
+  }
+
+  /**
+   * Helper method to get human-readable action name for logging
+   */
+  private String getActionName(int action)
+  {
+    switch (action)
+    {
+      case AccessibilityNodeInfo.ACTION_CLICK: return "CLICK";
+      case AccessibilityNodeInfo.ACTION_LONG_CLICK: return "LONG_CLICK";
+      case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: return "ACCESSIBILITY_FOCUS";
+      case AccessibilityNodeInfo.ACTION_CLEAR_ACCESSIBILITY_FOCUS: return "CLEAR_ACCESSIBILITY_FOCUS";
+      case AccessibilityNodeInfo.ACTION_FOCUS: return "FOCUS";
+      case AccessibilityNodeInfo.ACTION_CLEAR_FOCUS: return "CLEAR_FOCUS";
+      default:
+        if (action >= 1 && action <= 8) return "CUSTOM_SWIPE_" + action;
+        return "UNKNOWN";
     }
   }
 
@@ -302,6 +450,14 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     event.setEnabled(true);
 
     _view.getParent().requestSendAccessibilityEvent(_view, event);
+  }
+
+  /**
+   * Check if a virtual view currently has accessibility focus
+   */
+  public boolean isVirtualViewFocused(int virtualViewId)
+  {
+    return _focusedVirtualViewId == virtualViewId;
   }
 
   /**

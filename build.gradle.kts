@@ -9,6 +9,10 @@ dependencies {
   implementation("androidx.window:window-java:1.3.0")
   implementation("androidx.core:core:1.16.0")
   testImplementation("junit:junit:4.13.2")
+  testImplementation("org.mockito:mockito-core:4.5.1")
+  androidTestImplementation("androidx.test.ext:junit:1.1.5")
+  androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+  androidTestImplementation("androidx.test.espresso:espresso-accessibility:3.5.1")
 }
 
 android {
@@ -21,6 +25,7 @@ android {
     targetSdk { version = release(35) }
     versionCode = 50
     versionName = "1.32.1"
+    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
   sourceSets {
@@ -33,6 +38,10 @@ android {
 
     named("test") {
       java.srcDirs("test")
+    }
+
+    named("androidTest") {
+      java.srcDirs("androidTest")
     }
   }
 
@@ -74,7 +83,7 @@ android {
       isShrinkResources = false
       isDebuggable = true
       applicationIdSuffix = ".debug"
-      resValue("string", "app_name", "@string/app_name_debug")
+      resValue("string", "app_name", "Unexpected Keyboard Debug")
       resValue("bool", "debug_logs", "true")
       signingConfig = signingConfigs["debug"]
     }
