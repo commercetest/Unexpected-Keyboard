@@ -78,6 +78,9 @@ public final class Config
   // Accessibility
   public boolean accessibility_enabled;
   public boolean accessibility_verbose;
+  public boolean accessibility_lift_to_type;
+  public int accessibility_lift_to_type_settling_time; // milliseconds
+  public float accessibility_lift_to_type_movement_tolerance; // percentage of key width
 
   // Dynamically set
   public boolean shouldOfferVoiceTyping;
@@ -198,7 +201,10 @@ public final class Config
     instrumentation_verbosity = TouchInstrumentation.VerbosityLevel.valueOf(verbosity_str);
     // Accessibility
     accessibility_enabled = _prefs.getBoolean("accessibility_enabled", true);
-    accessibility_verbose = _prefs.getBoolean("accessibility_verbose", false);
+    accessibility_verbose = _prefs.getBoolean("accessibility_verbose", true); // Enable verbose mode by default for swipe option announcements
+    accessibility_lift_to_type = _prefs.getBoolean("accessibility_lift_to_type", true);
+    accessibility_lift_to_type_settling_time = _prefs.getInt("accessibility_lift_to_type_settling_time", 300);
+    accessibility_lift_to_type_movement_tolerance = _prefs.getInt("accessibility_lift_to_type_movement_tolerance", 20) / 100.f;
 
     float screen_width_dp = dm.widthPixels / dm.density;
     wide_screen = screen_width_dp >= WIDE_DEVICE_THRESHOLD;

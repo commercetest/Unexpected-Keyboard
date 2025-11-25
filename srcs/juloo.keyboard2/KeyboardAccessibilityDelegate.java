@@ -37,6 +37,9 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
   // Accessibility helper for generating descriptions
   private AccessibilityHelper _accessibilityHelper;
 
+  // Config for accessing accessibility settings
+  private Config _config;
+
   // Cache of virtual view IDs mapped to keys
   private List<KeyInfo> _keyInfoList = new ArrayList<>();
 
@@ -67,10 +70,11 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     }
   }
 
-  public KeyboardAccessibilityDelegate(View view, AccessibilityHelper helper)
+  public KeyboardAccessibilityDelegate(View view, AccessibilityHelper helper, Config config)
   {
     _view = view;
     _accessibilityHelper = helper;
+    _config = config;
   }
 
   /**
@@ -276,12 +280,9 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
       node.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_ACCESSIBILITY_FOCUS);
       node.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_CLEAR_ACCESSIBILITY_FOCUS);
 
-      // Add ACTION_CLICK with custom label to make it explicit for IME context
-      String keyDesc = _accessibilityHelper.getKeyDescription(keyInfo.key.keys[0]);
-      node.addAction(new AccessibilityNodeInfo.AccessibilityAction(
-          AccessibilityNodeInfo.ACTION_CLICK,
-          "Type " + keyDesc
-      ));
+      // Add ACTION_CLICK - TalkBack will automatically announce "double-tap to activate"
+      // or "lift to type" based on its own settings, so we don't add confusing custom labels
+      node.addAction(AccessibilityNodeInfo.ACTION_CLICK);
 
       // Add custom actions for swipe gestures (use IDs 256+ to avoid conflicts)
       int actionId = 256;
@@ -371,6 +372,9 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
           _accessibilityHelper.announceKeyFocus(_view, keyInfo.key);
         }
 
+        // Trigger redraw to show accessibility focus rectangle
+        _view.invalidate();
+
         // Send accessibility event
         sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
         return true;
@@ -379,6 +383,8 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
         if (_focusedVirtualViewId == virtualViewId)
         {
           _focusedVirtualViewId = INVALID_ID;
+          // Trigger redraw to remove accessibility focus rectangle
+          _view.invalidate();
         }
         sendEventForVirtualView(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED);
         return true;

@@ -106,8 +106,9 @@ public class KeyboardAccessibilityInstrumentedTest {
     @Test
     public void testKeyboardAccessibilityDelegateCreation() {
         View mockView = new View(context);
+        Config config = new Config(context);
         KeyboardAccessibilityDelegate delegate =
-            new KeyboardAccessibilityDelegate(mockView, accessibilityHelper);
+            new KeyboardAccessibilityDelegate(mockView, accessibilityHelper, config);
         assertNotNull("KeyboardAccessibilityDelegate should be created", delegate);
     }
 

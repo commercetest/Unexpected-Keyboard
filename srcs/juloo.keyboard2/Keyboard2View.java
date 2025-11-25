@@ -11,6 +11,7 @@ import android.inputmethodservice.InputMethodService;
 import android.os.Build.VERSION;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -44,6 +45,7 @@ public class Keyboard2View extends View
   private KeyboardAccessibilityDelegate _accessibilityDelegate;
   private KeyboardData.Key _lastHoveredKey = null;
 
+
   private float _keyWidth;
   private float _mainLabelSize;
   private float _subLabelSize;
@@ -74,7 +76,7 @@ public class Keyboard2View extends View
     _pointers = new Pointers(this, _config);
     _accessibilityHelper = new AccessibilityHelper(context);
     _pointers.setAccessibilityHelper(_accessibilityHelper);
-    _accessibilityDelegate = new KeyboardAccessibilityDelegate(this, _accessibilityHelper);
+    _accessibilityDelegate = new KeyboardAccessibilityDelegate(this, _accessibilityHelper, _config);
     refresh_navigation_bar(context);
     setOnTouchListener(this);
     // Enable accessibility
@@ -272,12 +274,15 @@ public class Keyboard2View extends View
         case MotionEvent.ACTION_HOVER_EXIT:
           // DON'T clear focus on hover exit - keep focus stable until user touches a different key
           // This prevents the "sticky focus" issue where focus is cleared between tap and double-tap
+          // Note: TalkBack handles lift-to-type automatically by calling ACTION_CLICK when
+          // the user lifts their finger after the typing focus delay
           break;
       }
     }
 
     return super.dispatchHoverEvent(event);
   }
+
 
   @Override
   public boolean onTouch(View v, MotionEvent event)
@@ -458,10 +463,35 @@ public class Keyboard2View extends View
             drawSubLabel(canvas, k.keys[i], x, y, keyW, keyH, i, isKeyDown, tc_key);
         }
         drawIndication(canvas, k, x, y, keyW, keyH, _tc);
+
+        // Draw accessibility focus rectangle if this key has focus
+        if (_accessibilityDelegate != null && _accessibilityHelper != null &&
+            _accessibilityHelper.isAccessibilityEnabled())
+        {
+          int virtualViewId = _accessibilityDelegate.getVirtualViewIdAt(x + keyW/2, y + keyH/2);
+          if (virtualViewId != Integer.MIN_VALUE &&
+              _accessibilityDelegate.isVirtualViewFocused(virtualViewId))
+          {
+            drawAccessibilityFocusRect(canvas, x, y, keyW, keyH);
+          }
+        }
+
         x += _keyWidth * k.width;
       }
       y += row.height * _tc.row_height;
     }
+  }
+
+  /** Draw green accessibility focus rectangle around focused key */
+  private void drawAccessibilityFocusRect(Canvas canvas, float x, float y, float w, float h)
+  {
+    Paint focusPaint = new Paint();
+    focusPaint.setStyle(Paint.Style.STROKE);
+    focusPaint.setColor(0xFF00FF00); // Bright green
+    focusPaint.setStrokeWidth(8.0f); // Thick border
+
+    float padding = 4.0f; // Small padding inside key
+    canvas.drawRect(x + padding, y + padding, x + w - padding, y + h - padding, focusPaint);
   }
 
   @Override

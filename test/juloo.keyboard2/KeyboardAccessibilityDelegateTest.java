@@ -28,6 +28,9 @@ public class KeyboardAccessibilityDelegateTest {
     @Mock
     private AccessibilityHelper mockAccessibilityHelper;
 
+    @Mock
+    private Config mockConfig;
+
     private KeyboardAccessibilityDelegate delegate;
 
     private KeyboardData createTestKeyboard(float keyWidth) {
@@ -48,7 +51,7 @@ public class KeyboardAccessibilityDelegateTest {
     @Before
     public void setUp() {
         when(mockView.getContext()).thenReturn(mockContext);
-        delegate = new KeyboardAccessibilityDelegate(mockView, mockAccessibilityHelper);
+        delegate = new KeyboardAccessibilityDelegate(mockView, mockAccessibilityHelper, mockConfig);
     }
 
     @Test
