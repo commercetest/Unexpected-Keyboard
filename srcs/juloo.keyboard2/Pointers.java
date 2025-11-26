@@ -173,6 +173,12 @@ public final class Pointers implements Handler.Callback
     // Notify handler of key up
     _handler.onPointerUp(value, mods);
 
+    // Haptic feedback to mirror touch activation for accessibility
+    if (_handler instanceof android.view.View)
+    {
+      VibratorCompat.vibrate((android.view.View)_handler, _config);
+    }
+
     // Announce via accessibility (use activation announcement for double-tap)
     if (_accessibilityHelper != null && _handler instanceof android.view.View)
     {
