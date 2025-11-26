@@ -280,6 +280,17 @@ List<TouchEvent> testEvents = receiver.getEventsSince(testStartTime);
 
 ### Using TouchEventMatcher
 
+- Compare against expected sequence using TouchEventMatcher
+- Run matching code inside Android Instrumentation test
+- Validate touch/multi-touch ordering and timing
+
+## Accessibility Tests
+
+- JVM unit tests: `./gradlew testDebugUnitTest --tests "juloo.keyboard2.AccessibilityHelperTest"`
+- Instrumented tests: `./gradlew connectedDebugAndroidTest`
+- Verify TalkBack custom action labels and modifier state descriptions (including localized French) via `KeyboardAccessibilityActionsInstrumentedTest`
+- Ensure accessibility strings are localized by switching `Locale` in tests as demonstrated
+
 ```java
 // Collect events from a test
 List<TouchEvent> events = receiver.getReceivedEvents();
