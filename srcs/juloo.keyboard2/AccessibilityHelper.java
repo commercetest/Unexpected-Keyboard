@@ -734,6 +734,26 @@ public class AccessibilityHelper
   /**
    * Generate content description for a key (for touch exploration)
    */
+  private void updateLastInputAnnouncement(KeyValue key)
+  {
+    if (key == null)
+    {
+      return;
+    }
+    if (key.getKind() == KeyValue.Kind.Char || key.getKind() == KeyValue.Kind.String)
+    {
+      _lastInputAnnouncement = getKeyDescription(key);
+    }
+    else if (key.getKind() == KeyValue.Kind.Keyevent)
+    {
+      int code = key.getKeyevent();
+      if (code != android.view.KeyEvent.KEYCODE_DEL && code != android.view.KeyEvent.KEYCODE_FORWARD_DEL)
+      {
+        _lastInputAnnouncement = "";
+      }
+    }
+  }
+
   public String getKeyContentDescription(KeyboardData.Key key, Pointers.Modifiers modifiers)
   {
     if (key == null || key.keys[0] == null)
