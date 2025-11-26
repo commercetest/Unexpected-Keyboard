@@ -537,22 +537,22 @@ public class AccessibilityHelper
         KeyValue.Event event = key.getEvent();
         switch (event)
         {
-          case CHANGE_METHOD_PICKER: return "switch keyboard";
-          case CHANGE_METHOD_AUTO: return "switch keyboard auto";
-          case SWITCH_TEXT: return "switch to text layout";
-          case SWITCH_NUMERIC: return "switch to numeric layout";
-          case SWITCH_EMOJI: return "emoji";
-          case SWITCH_BACK_EMOJI: return "back from emoji";
-          case SWITCH_CLIPBOARD: return "clipboard";
-          case SWITCH_BACK_CLIPBOARD: return "back from clipboard";
-          case SWITCH_FORWARD: return "switch forward";
-          case SWITCH_BACKWARD: return "switch backward";
-          case SWITCH_GREEKMATH: return "greek math symbols";
-          case CAPS_LOCK: return "caps lock";
-          case SWITCH_VOICE_TYPING: return "voice typing";
-          case SWITCH_VOICE_TYPING_CHOOSER: return "voice typing chooser";
-          case ACTION: return "action";
-          case CONFIG: return "settings";
+          case CHANGE_METHOD_PICKER: return getStringSafe(R.string.a11y_event_change_method_picker, "switch keyboard");
+          case CHANGE_METHOD_AUTO: return getStringSafe(R.string.a11y_event_change_method_auto, "switch keyboard auto");
+          case SWITCH_TEXT: return getStringSafe(R.string.a11y_event_switch_text, "switch to text layout");
+          case SWITCH_NUMERIC: return getStringSafe(R.string.a11y_event_switch_numeric, "switch to numeric layout");
+          case SWITCH_EMOJI: return getStringSafe(R.string.a11y_event_switch_emoji, "emoji");
+          case SWITCH_BACK_EMOJI: return getStringSafe(R.string.a11y_event_switch_back_emoji, "back from emoji");
+          case SWITCH_CLIPBOARD: return getStringSafe(R.string.a11y_event_switch_clipboard, "clipboard");
+          case SWITCH_BACK_CLIPBOARD: return getStringSafe(R.string.a11y_event_switch_back_clipboard, "back from clipboard");
+          case SWITCH_FORWARD: return getStringSafe(R.string.a11y_event_switch_forward, "switch forward");
+          case SWITCH_BACKWARD: return getStringSafe(R.string.a11y_event_switch_backward, "switch backward");
+          case SWITCH_GREEKMATH: return getStringSafe(R.string.a11y_event_switch_greekmath, "greek math symbols");
+          case CAPS_LOCK: return getStringSafe(R.string.a11y_event_caps_lock, "caps lock");
+          case SWITCH_VOICE_TYPING: return getStringSafe(R.string.a11y_event_switch_voice_typing, "voice typing");
+          case SWITCH_VOICE_TYPING_CHOOSER: return getStringSafe(R.string.a11y_event_switch_voice_typing_chooser, "voice typing chooser");
+          case ACTION: return getStringSafe(R.string.a11y_event_action, "action");
+          case CONFIG: return getStringSafe(R.string.a11y_event_config, "settings");
           default: return event.toString();
         }
 
@@ -560,19 +560,19 @@ public class AccessibilityHelper
         int keycode = key.getKeyevent();
         switch (keycode)
         {
-          case android.view.KeyEvent.KEYCODE_DEL: return "backspace";
-          case android.view.KeyEvent.KEYCODE_FORWARD_DEL: return "delete";
-          case android.view.KeyEvent.KEYCODE_ENTER: return "enter";
-          case android.view.KeyEvent.KEYCODE_DPAD_LEFT: return "left arrow";
-          case android.view.KeyEvent.KEYCODE_DPAD_RIGHT: return "right arrow";
-          case android.view.KeyEvent.KEYCODE_DPAD_UP: return "up arrow";
-          case android.view.KeyEvent.KEYCODE_DPAD_DOWN: return "down arrow";
-          case android.view.KeyEvent.KEYCODE_MOVE_HOME: return "home";
-          case android.view.KeyEvent.KEYCODE_MOVE_END: return "end";
-          case android.view.KeyEvent.KEYCODE_PAGE_UP: return "page up";
-          case android.view.KeyEvent.KEYCODE_PAGE_DOWN: return "page down";
-          case android.view.KeyEvent.KEYCODE_ESCAPE: return "escape";
-          case android.view.KeyEvent.KEYCODE_TAB: return "tab";
+          case android.view.KeyEvent.KEYCODE_DEL: return getStringSafe(R.string.a11y_key_backspace, "backspace");
+          case android.view.KeyEvent.KEYCODE_FORWARD_DEL: return getStringSafe(R.string.a11y_key_delete, "delete");
+          case android.view.KeyEvent.KEYCODE_ENTER: return getStringSafe(R.string.a11y_key_enter, "enter");
+          case android.view.KeyEvent.KEYCODE_DPAD_LEFT: return getStringSafe(R.string.a11y_key_left_arrow, "left arrow");
+          case android.view.KeyEvent.KEYCODE_DPAD_RIGHT: return getStringSafe(R.string.a11y_key_right_arrow, "right arrow");
+          case android.view.KeyEvent.KEYCODE_DPAD_UP: return getStringSafe(R.string.a11y_key_up_arrow, "up arrow");
+          case android.view.KeyEvent.KEYCODE_DPAD_DOWN: return getStringSafe(R.string.a11y_key_down_arrow, "down arrow");
+          case android.view.KeyEvent.KEYCODE_MOVE_HOME: return getStringSafe(R.string.a11y_key_home, "home");
+          case android.view.KeyEvent.KEYCODE_MOVE_END: return getStringSafe(R.string.a11y_key_end, "end");
+          case android.view.KeyEvent.KEYCODE_PAGE_UP: return getStringSafe(R.string.a11y_key_page_up, "page up");
+          case android.view.KeyEvent.KEYCODE_PAGE_DOWN: return getStringSafe(R.string.a11y_key_page_down, "page down");
+          case android.view.KeyEvent.KEYCODE_ESCAPE: return getStringSafe(R.string.a11y_key_escape, "escape");
+          case android.view.KeyEvent.KEYCODE_TAB: return getStringSafe(R.string.a11y_key_tab, "tab");
           default: return "key " + keycode;
         }
 
@@ -601,12 +601,12 @@ public class AccessibilityHelper
         KeyValue.Slider slider = key.getSlider();
         switch (slider)
         {
-          case Cursor_left: return "move cursor left";
-          case Cursor_right: return "move cursor right";
-          case Cursor_up: return "move cursor up";
-          case Cursor_down: return "move cursor down";
-          case Selection_cursor_left: return "select left";
-          case Selection_cursor_right: return "select right";
+          case Cursor_left: return getStringSafe(R.string.a11y_slider_cursor_left, "move cursor left");
+          case Cursor_right: return getStringSafe(R.string.a11y_slider_cursor_right, "move cursor right");
+          case Cursor_up: return getStringSafe(R.string.a11y_slider_cursor_up, "move cursor up");
+          case Cursor_down: return getStringSafe(R.string.a11y_slider_cursor_down, "move cursor down");
+          case Selection_cursor_left: return getStringSafe(R.string.a11y_slider_selection_left, "select left");
+          case Selection_cursor_right: return getStringSafe(R.string.a11y_slider_selection_right, "select right");
           default: return "slider " + slider.toString();
         }
 
