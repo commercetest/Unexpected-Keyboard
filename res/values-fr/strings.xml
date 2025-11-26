@@ -136,7 +136,7 @@
     <string name="clipboard_remove_confirmed">Oui</string>
     <string name="toast_no_voice_input">Pas d\'application de saisie vocale</string>
     <string name="a11y_key_enter">entrée</string>
-    <string name="a11y_key_space">barre d'espace</string>
+    <string name="a11y_key_space">barre d&apos;espace</string>
     <string name="a11y_key_tab">tabulation</string>
     <string name="a11y_key_exclamation">exclamation</string>
     <string name="a11y_key_quote">guillemet</string>
@@ -158,7 +158,7 @@
     <string name="a11y_key_less_than">inférieur à</string>
     <string name="a11y_key_equals">égal</string>
     <string name="a11y_key_greater_than">supérieur à</string>
-    <string name="a11y_key_question_mark">point d'interrogation</string>
+    <string name="a11y_key_question_mark">point d&apos;interrogation</string>
     <string name="a11y_key_at">arobase</string>
     <string name="a11y_key_left_bracket">crochet gauche</string>
     <string name="a11y_key_backslash">barre oblique inversée</string>
