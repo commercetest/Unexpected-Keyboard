@@ -196,13 +196,31 @@ public class AccessibilityHelper
   {
     if (locked)
     {
-      return _context.getString(R.string.a11y_state_locked);
+      return getStringSafe(R.string.a11y_state_locked, "locked");
     }
     if (latched)
     {
-      return _context.getString(R.string.a11y_state_on);
+      return getStringSafe(R.string.a11y_state_on, "on");
     }
-    return _context.getString(R.string.a11y_state_off);
+    return getStringSafe(R.string.a11y_state_off, "off");
+  }
+
+  /**
+   * Safely resolve a string; falls back to the provided default when the Context is null (e.g. in JVM tests without Android resources).
+   */
+  private String getStringSafe(int resId, String fallback)
+  {
+    try
+    {
+      if (_context != null)
+      {
+        String value = _context.getString(resId);
+        if (value != null && !value.isEmpty())
+          return value;
+      }
+    }
+    catch (Exception ignored) { }
+    return fallback;
   }
 
   /**
