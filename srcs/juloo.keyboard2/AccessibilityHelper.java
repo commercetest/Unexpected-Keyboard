@@ -203,6 +203,22 @@ public class AccessibilityHelper
   }
 
   /**
+   * Build a state description string for modifier keys.
+   */
+  public String getModifierStateDescription(boolean latched, boolean locked)
+  {
+    if (locked)
+    {
+      return "locked";
+    }
+    if (latched)
+    {
+      return "on";
+    }
+    return "off";
+  }
+
+  /**
    * Announce that touch exploration has started on a key
    */
   public void announceKeyFocus(View view, KeyboardData.Key key)
@@ -317,7 +333,7 @@ public class AccessibilityHelper
           options.append(", ");
         }
 
-        String direction = directionNames[i - 1];
+        String direction = getCornerDirectionName(i);
         String keyDesc = getKeyDescription(key.keys[i]);
 
         options.append("swipe ");
@@ -651,6 +667,29 @@ public class AccessibilityHelper
       case Roundtrip: return "roundtrip";
       case Swipe: return "swipe";
       default: return gesture.toString();
+    }
+  }
+
+  /**
+   * Direction names for key.keys indices 1-8.
+   *  1 7 2
+   *  5 0 6
+   *  3 8 4
+   * Where 1=nw, 2=ne, 3=sw, 4=se, 5=w, 6=e, 7=n, 8=s.
+   */
+  static String getCornerDirectionName(int index)
+  {
+    switch (index)
+    {
+      case 1: return "up and left";
+      case 2: return "up and right";
+      case 3: return "down and left";
+      case 4: return "down and right";
+      case 5: return "left";
+      case 6: return "right";
+      case 7: return "up";
+      case 8: return "down";
+      default: return "";
     }
   }
 

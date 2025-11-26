@@ -170,6 +170,12 @@ public class Keyboard2View extends View
     }
   }
 
+  /** Exposed for accessibility metadata that needs current pointer flags. */
+  public Pointers getPointers()
+  {
+    return _pointers;
+  }
+
   public void reset()
   {
     _mods = Pointers.Modifiers.EMPTY;

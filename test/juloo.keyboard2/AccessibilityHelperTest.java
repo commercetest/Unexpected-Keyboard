@@ -79,4 +79,25 @@ public class AccessibilityHelperTest {
         // Then
         assertEquals("swipe up to type b", announcement);
     }
+
+    @Test
+    public void testCornerDirectionNames() {
+        assertEquals("up and left", AccessibilityHelper.getCornerDirectionName(1));
+        assertEquals("up and right", AccessibilityHelper.getCornerDirectionName(2));
+        assertEquals("down and left", AccessibilityHelper.getCornerDirectionName(3));
+        assertEquals("down and right", AccessibilityHelper.getCornerDirectionName(4));
+        assertEquals("left", AccessibilityHelper.getCornerDirectionName(5));
+        assertEquals("right", AccessibilityHelper.getCornerDirectionName(6));
+        assertEquals("up", AccessibilityHelper.getCornerDirectionName(7));
+        assertEquals("down", AccessibilityHelper.getCornerDirectionName(8));
+        assertEquals("", AccessibilityHelper.getCornerDirectionName(9));
+    }
+
+    @Test
+    public void testModifierStateDescriptions() {
+        assertEquals("off", accessibilityHelper.getModifierStateDescription(false, false));
+        assertEquals("on", accessibilityHelper.getModifierStateDescription(true, false));
+        assertEquals("locked", accessibilityHelper.getModifierStateDescription(true, true));
+        assertEquals("locked", accessibilityHelper.getModifierStateDescription(false, true));
+    }
 }

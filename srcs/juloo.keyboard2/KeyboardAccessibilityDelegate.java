@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
+import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -209,6 +210,12 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
         node.setCollectionInfo(AccessibilityNodeInfo.CollectionInfo.obtain(rowCount, colCount, false));
       }
 
+      // Provide a pane title to announce keyboard appearance (API 28+)
+      if (Build.VERSION.SDK_INT >= 28)
+      {
+        node.setPaneTitle("Keyboard");
+      }
+
       return node;
     }
 
@@ -258,6 +265,17 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     node.setVisibleToUser(true);
     node.setScreenReaderFocusable(true);
 
+    // Provide role and state descriptions where possible
+    AccessibilityNodeInfoCompat.wrap(node).setRoleDescription("Keyboard key");
+    if (Build.VERSION.SDK_INT >= 30 && keyInfo.key.keys[0] != null &&
+        keyInfo.key.keys[0].getKind() == KeyValue.Kind.Modifier)
+    {
+      int flags = ((Keyboard2View)_view).getPointers().getKeyFlags(keyInfo.key.keys[0]);
+      boolean latched = (flags & Pointers.FLAG_P_LATCHED) != 0;
+      boolean locked = (flags & Pointers.FLAG_P_LOCKED) != 0;
+      node.setStateDescription(_accessibilityHelper.getModifierStateDescription(latched, locked));
+    }
+
     // Explicitly mark as important for accessibility
     if (Build.VERSION.SDK_INT >= 24)
     {
@@ -272,6 +290,21 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
 
     // Set collection item info
     node.setCollectionItemInfo(AccessibilityNodeInfo.CollectionItemInfo.obtain(keyInfo.row, 1, keyInfo.column, 1, false, false));
+
+    // Provide traversal hints for predictable navigation order
+    if (Build.VERSION.SDK_INT >= 22)
+    {
+      int prevId = virtualViewId - 1;
+      int nextId = virtualViewId + 1;
+      if (prevId >= 0)
+      {
+        node.setTraversalAfter(_view, prevId);
+      }
+      if (nextId < _keyInfoList.size())
+      {
+        node.setTraversalBefore(_view, nextId);
+      }
+    }
 
     // Add standard actions
     if (Build.VERSION.SDK_INT >= 21)
@@ -288,7 +321,7 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
       int actionId = 256;
       for (int i = 1; i <= 8; i++) {
           if (keyInfo.key.keys[i] != null && !keyInfo.key.keys[i].equals(keyInfo.key.keys[0])) {
-              String label = "Swipe " + _accessibilityHelper.getDirectionName(i) + " for " + _accessibilityHelper.getKeyDescription(keyInfo.key.keys[i]);
+              String label = "Swipe " + AccessibilityHelper.getCornerDirectionName(i) + " for " + _accessibilityHelper.getKeyDescription(keyInfo.key.keys[i]);
               node.addAction(new AccessibilityNodeInfo.AccessibilityAction(actionId, label));
               actionId++;
           }

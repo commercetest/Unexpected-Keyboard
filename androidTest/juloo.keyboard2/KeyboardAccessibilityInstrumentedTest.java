@@ -28,6 +28,7 @@ public class KeyboardAccessibilityInstrumentedTest {
     @Before
     public void setUp() {
         context = ApplicationProvider.getApplicationContext();
+        ensureConfigInitialized(context);
         accessibilityHelper = new AccessibilityHelper(context);
         accessibilityHelper.setEnabled(true);
     }
@@ -106,7 +107,7 @@ public class KeyboardAccessibilityInstrumentedTest {
     @Test
     public void testKeyboardAccessibilityDelegateCreation() {
         View mockView = new View(context);
-        Config config = new Config(context);
+        Config config = Config.globalConfig();
         KeyboardAccessibilityDelegate delegate =
             new KeyboardAccessibilityDelegate(mockView, accessibilityHelper, config);
         assertNotNull("KeyboardAccessibilityDelegate should be created", delegate);
@@ -120,5 +121,24 @@ public class KeyboardAccessibilityInstrumentedTest {
             null
         );
         assertEquals("capital a", description);
+    }
+
+    private void ensureConfigInitialized(Context ctx) {
+        if (Config.globalConfig() != null) {
+            return;
+        }
+        Config.initGlobalConfig(
+            ctx.getSharedPreferences("a11y-test", Context.MODE_PRIVATE),
+            ctx.getResources(),
+            new Config.IKeyEventHandler() {
+                @Override
+                public void key_down(KeyValue value, boolean is_swipe) { }
+                @Override
+                public void key_up(KeyValue value, Pointers.Modifiers mods) { }
+                @Override
+                public void mods_changed(Pointers.Modifiers mods) { }
+            },
+            Boolean.FALSE
+        );
     }
 }
