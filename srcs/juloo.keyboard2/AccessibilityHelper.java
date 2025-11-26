@@ -484,41 +484,41 @@ public class AccessibilityHelper
         // Special character descriptions
         switch (charStr)
         {
-          case " ": return "space bar";
-          case "\n": return "enter";
-          case "\t": return "tab";
-          case "!": return "exclamation";
-          case "\"": return "quote";
-          case "#": return "hash";
-          case "$": return "dollar";
-          case "%": return "percent";
-          case "&": return "ampersand";
-          case "'": return "apostrophe";
-          case "(": return "left parenthesis";
-          case ")": return "right parenthesis";
-          case "*": return "asterisk";
-          case "+": return "plus";
-          case ",": return "comma";
-          case "-": return "minus";
-          case ".": return "period";
-          case "/": return "slash";
-          case ":": return "colon";
-          case ";": return "semicolon";
-          case "<": return "less than";
-          case "=": return "equals";
-          case ">": return "greater than";
-          case "?": return "question mark";
-          case "@": return "at";
-          case "[": return "left bracket";
-          case "\\": return "backslash";
-          case "]": return "right bracket";
-          case "^": return "caret";
-          case "_": return "underscore";
-          case "`": return "backtick";
-          case "{": return "left brace";
-          case "|": return "pipe";
-          case "}": return "right brace";
-          case "~": return "tilde";
+          case " ": return getStringSafe(R.string.a11y_key_space, "space bar");
+          case "\n": return getStringSafe(R.string.a11y_key_enter, "enter");
+          case "\t": return getStringSafe(R.string.a11y_key_tab, "tab");
+          case "!": return getStringSafe(R.string.a11y_key_exclamation, "exclamation");
+          case "\"": return getStringSafe(R.string.a11y_key_quote, "quote");
+          case "#": return getStringSafe(R.string.a11y_key_hash, "hash");
+          case "$": return getStringSafe(R.string.a11y_key_dollar, "dollar");
+          case "%": return getStringSafe(R.string.a11y_key_percent, "percent");
+          case "&": return getStringSafe(R.string.a11y_key_ampersand, "ampersand");
+          case "'": return getStringSafe(R.string.a11y_key_apostrophe, "apostrophe");
+          case "(": return getStringSafe(R.string.a11y_key_left_paren, "left parenthesis");
+          case ")": return getStringSafe(R.string.a11y_key_right_paren, "right parenthesis");
+          case "*": return getStringSafe(R.string.a11y_key_asterisk, "asterisk");
+          case "+": return getStringSafe(R.string.a11y_key_plus, "plus");
+          case ",": return getStringSafe(R.string.a11y_key_comma, "comma");
+          case "-": return getStringSafe(R.string.a11y_key_minus, "minus");
+          case ".": return getStringSafe(R.string.a11y_key_period, "period");
+          case "/": return getStringSafe(R.string.a11y_key_slash, "slash");
+          case ":": return getStringSafe(R.string.a11y_key_colon, "colon");
+          case ";": return getStringSafe(R.string.a11y_key_semicolon, "semicolon");
+          case "<": return getStringSafe(R.string.a11y_key_less_than, "less than");
+          case "=": return getStringSafe(R.string.a11y_key_equals, "equals");
+          case ">": return getStringSafe(R.string.a11y_key_greater_than, "greater than");
+          case "?": return getStringSafe(R.string.a11y_key_question_mark, "question mark");
+          case "@": return getStringSafe(R.string.a11y_key_at, "at");
+          case "[": return getStringSafe(R.string.a11y_key_left_bracket, "left bracket");
+          case "\\": return getStringSafe(R.string.a11y_key_backslash, "backslash");
+          case "]": return getStringSafe(R.string.a11y_key_right_bracket, "right bracket");
+          case "^": return getStringSafe(R.string.a11y_key_caret, "caret");
+          case "_": return getStringSafe(R.string.a11y_key_underscore, "underscore");
+          case "`": return getStringSafe(R.string.a11y_key_backtick, "backtick");
+          case "{": return getStringSafe(R.string.a11y_key_left_brace, "left brace");
+          case "|": return getStringSafe(R.string.a11y_key_pipe, "pipe");
+          case "}": return getStringSafe(R.string.a11y_key_right_brace, "right brace");
+          case "~": return getStringSafe(R.string.a11y_key_tilde, "tilde");
           default:
             // For single characters, just return the character
             if (charStr.length() == 1)
