@@ -196,7 +196,6 @@
     <string name="a11y_state_off">off</string>
     <string name="a11y_key_backspace">backspace</string>
     <string name="a11y_key_delete">delete</string>
-    <string name="a11y_key_enter">enter</string>
     <string name="a11y_key_left_arrow">left arrow</string>
     <string name="a11y_key_right_arrow">right arrow</string>
     <string name="a11y_key_up_arrow">up arrow</string>
