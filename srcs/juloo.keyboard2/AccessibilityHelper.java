@@ -235,11 +235,26 @@ public class AccessibilityHelper
       return;
     }
     String text = getStringSafe(R.string.a11y_layout_changed, "Layout changed");
-    if (layoutName != null && !layoutName.isEmpty())
+    String friendly = mapLayoutName(layoutName);
+    if (!friendly.isEmpty())
     {
-      text = text + ": " + layoutName;
+      text = text + ": " + friendly;
     }
     announce(view, text);
+  }
+
+  private String mapLayoutName(String layoutName)
+  {
+    if (layoutName == null)
+      return "";
+    String lower = layoutName.toLowerCase();
+    if (lower.contains("emoji"))
+      return getStringSafe(R.string.a11y_layout_emoji, "emoji keyboard");
+    if (lower.contains("clip"))
+      return getStringSafe(R.string.a11y_layout_clipboard, "clipboard");
+    if (lower.contains("num") || lower.contains("number"))
+      return getStringSafe(R.string.a11y_layout_numeric, "numeric keyboard");
+    return getStringSafe(R.string.a11y_layout_text, "text keyboard");
   }
 
   /**
@@ -286,19 +301,12 @@ public class AccessibilityHelper
 
     Log.d(TAG, "Announcing: " + announcement);
 
-    // Prefer announceForAccessibility on modern devices; fall back to an event for older APIs.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-    {
-      view.announceForAccessibility(announcement);
-    }
-    else
-    {
-      AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_ANNOUNCEMENT);
-      event.getText().add(announcement);
-      event.setClassName(view.getClass().getName());
-      event.setPackageName(view.getContext().getPackageName());
-      view.sendAccessibilityEventUnchecked(event);
-    }
+    // Single-path announcement to avoid double-speaking
+    AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_ANNOUNCEMENT);
+    event.getText().add(announcement);
+    event.setClassName(view.getClass().getName());
+    event.setPackageName(view.getContext().getPackageName());
+    view.sendAccessibilityEventUnchecked(event);
   }
 
   /**

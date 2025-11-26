@@ -195,6 +195,10 @@
     <string name="a11y_state_on">on</string>
     <string name="a11y_state_off">off</string>
     <string name="a11y_layout_changed">Layout changed</string>
+    <string name="a11y_layout_text">text keyboard</string>
+    <string name="a11y_layout_numeric">numeric keyboard</string>
+    <string name="a11y_layout_emoji">emoji keyboard</string>
+    <string name="a11y_layout_clipboard">clipboard</string>
     <string name="a11y_key_backspace">backspace</string>
     <string name="a11y_key_delete">delete</string>
     <string name="a11y_key_left_arrow">left arrow</string>

@@ -209,4 +209,8 @@
     <string name="a11y_state_on">activé</string>
     <string name="a11y_state_off">désactivé</string>
     <string name="a11y_layout_changed">Disposition changée</string>
+    <string name="a11y_layout_text">clavier texte</string>
+    <string name="a11y_layout_numeric">clavier numérique</string>
+    <string name="a11y_layout_emoji">clavier emoji</string>
+    <string name="a11y_layout_clipboard">presse-papiers</string>
 </resources>
