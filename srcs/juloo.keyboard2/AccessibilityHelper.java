@@ -28,6 +28,7 @@ public class AccessibilityHelper
   private AccessibilityManager _accessibilityManager;
   private boolean _enabled = true;
   private boolean _verboseMode = false;
+  private String _lastInputAnnouncement = "";
 
   public AccessibilityHelper(Context context)
   {
@@ -86,6 +87,7 @@ public class AccessibilityHelper
     }
 
     String announcement = buildKeyActivationAnnouncement(key, modifiers);
+    updateLastInputAnnouncement(key);
     announce(view, announcement);
   }
 
@@ -221,6 +223,23 @@ public class AccessibilityHelper
     }
     catch (Exception ignored) { }
     return fallback;
+  }
+
+  /**
+   * Announce that the keyboard layout changed.
+   */
+  public void announceLayoutChange(View view, String layoutName)
+  {
+    if (!_enabled || !isAccessibilityEnabled())
+    {
+      return;
+    }
+    String text = getStringSafe(R.string.a11y_layout_changed, "Layout changed");
+    if (layoutName != null && !layoutName.isEmpty())
+    {
+      text = text + ": " + layoutName;
+    }
+    announce(view, text);
   }
 
   /**
@@ -452,11 +471,24 @@ public class AccessibilityHelper
 
     if (isDelete)
     {
-      announcement.append(", deleted");
+      if (!_lastInputAnnouncement.isEmpty())
+      {
+        announcement.append(", deleted ");
+        announcement.append(_lastInputAnnouncement);
+        _lastInputAnnouncement = "";
+      }
+      else
+      {
+        announcement.append(", deleted");
+      }
     }
     else
     {
       announcement.append(", selected");
+      if (key.getKind() == KeyValue.Kind.Char || key.getKind() == KeyValue.Kind.String)
+      {
+        _lastInputAnnouncement = getKeyDescription(key);
+      }
     }
 
     return announcement.toString();
