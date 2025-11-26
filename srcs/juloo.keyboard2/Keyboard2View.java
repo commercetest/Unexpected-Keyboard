@@ -117,6 +117,8 @@ public class Keyboard2View extends View
       return;
     // The intermediate Window is a [Dialog].
     Window w = getParentWindow(context);
+    if (w == null)
+      return;
     w.setNavigationBarColor(_theme.colorNavBar);
     if (VERSION.SDK_INT < 26)
       return;
@@ -137,6 +139,11 @@ public class Keyboard2View extends View
     _compose_key = _keyboard.findKeyWithValue(_compose_kv);
     KeyModifier.set_modmap(_keyboard.modmap);
     reset();
+    if (_accessibilityHelper != null && _accessibilityHelper.isAccessibilityEnabled())
+    {
+      String layoutName = (_keyboard.name != null) ? _keyboard.name : "";
+      _accessibilityHelper.announceLayoutChange(this, layoutName);
+    }
   }
 
   @Override
