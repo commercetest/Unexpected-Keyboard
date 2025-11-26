@@ -3,7 +3,7 @@
     <string name="app_name_release">Unexpected Keyboard</string>
     <string name="app_name_debug">Unexpected Keyboard (debug)</string>
     <string name="short_description">Clavier virtuel léger et respectueux de la vie privée pour Android.</string>
-    <string name="store_description">La fonctionnalité principale est l'accès rapide à plus de caractères en balayant les touches vers les coins.\n\nCette application a été conçue à l'origine pour les programmeurs utilisant Termux.\nElle est maintenant parfaite pour une utilisation quotidienne.\n\nCette application ne contient pas de publicité, n'accède pas au réseau et est Open Source.</string>
+    <string name="store_description">La fonctionnalité principale est l&apos;accès rapide à plus de caractères en balayant les touches vers les coins.\n\nCette application a été conçue à l&apos;origine pour les programmeurs utilisant Termux.\nElle est maintenant parfaite pour une utilisation quotidienne.\n\nCette application ne contient pas de publicité, n&apos;accède pas au réseau et est Open Source.</string>
     <string name="pref_portrait">En mode portrait</string>
     <string name="pref_portrait_unfolded">En mode portrait déplié</string>
     <string name="pref_landscape">En mode landscape</string>
@@ -37,7 +37,7 @@
     <string name="pref_category_typing">Saisie</string>
     <string name="pref_swipe_dist_title">Distance de swipe</string>
     <string name="pref_swipe_dist_summary">La distance des caractères dans les coins (%s)</string>
-    <string name="pref_long_timeout_title">Delai de l'appui long</string>
+    <string name="pref_long_timeout_title">Delai de l&apos;appui long</string>
     <string name="pref_long_interval_title">Écart entre les répétitions</string>
     <string name="pref_keyrepeat_enabled">Répétition par appui long</string>
     <string name="pref_lock_double_tap_title">Appuyer deux fois pour bloquer la majuscule</string>
@@ -98,7 +98,7 @@
     <string name="launcher_button_imepicker">Selectionner le clavier</string>
     <string name="launcher_description">Cette application est un clavier virtuel. Activez-le dans les paramètres système en cliquant sur le bouton ci-dessous.</string>
     <string name="launcher_sourcecode">Cette application est libre et open-source. Lisez le source code et reportez des problèmes sur Github.</string>
-    <string name="launcher_tryhere">Après l'avoir activé, vous pouvez l'essayer ici :</string>
+    <string name="launcher_tryhere">Après l&apos;avoir activé, vous pouvez l&apos;essayer ici :</string>
     <string name="launcher_tryhere_hint">Essayer ici</string>
     <string name="key_descr_capslock">Verrouillage majuscules</string>
     <string name="key_descr_compose">Composition</string>
@@ -134,9 +134,9 @@
     <string name="clipboard_pin_heading">Épinglé</string>
     <string name="clipboard_remove_confirm">Supprimer ce presse-papiers ?</string>
     <string name="clipboard_remove_confirmed">Oui</string>
-    <string name="toast_no_voice_input">Pas d'application de saisie vocale</string>
+    <string name="toast_no_voice_input">Pas d&apos;application de saisie vocale</string>
     <string name="a11y_key_enter">entrée</string>
-    <string name="a11y_key_space">barre d'espace</string>
+    <string name="a11y_key_space">barre d&apos;espace</string>
     <string name="a11y_key_tab">tabulation</string>
     <string name="a11y_key_exclamation">exclamation</string>
     <string name="a11y_key_quote">guillemet</string>
@@ -158,7 +158,7 @@
     <string name="a11y_key_less_than">inférieur à</string>
     <string name="a11y_key_equals">égal</string>
     <string name="a11y_key_greater_than">supérieur à</string>
-    <string name="a11y_key_question_mark">point d'interrogation</string>
+    <string name="a11y_key_question_mark">point d&apos;interrogation</string>
     <string name="a11y_key_at">arobase</string>
     <string name="a11y_key_left_bracket">crochet gauche</string>
     <string name="a11y_key_backslash">barre oblique inversée</string>
