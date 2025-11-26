@@ -275,10 +275,11 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
       boolean locked = (flags & Pointers.FLAG_P_LOCKED) != 0;
       node.setStateDescription(_accessibilityHelper.getModifierStateDescription(latched, locked));
     }
+    // Live region for modifier state changes (API 19+)
     if (Build.VERSION.SDK_INT >= 19 && keyInfo.key.keys[0] != null &&
         keyInfo.key.keys[0].getKind() == KeyValue.Kind.Modifier)
     {
-      node.setLiveRegion(AccessibilityNodeInfo.LIVE_REGION_POLITE);
+      node.setLiveRegion(AccessibilityNodeInfo.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
     // Explicitly mark as important for accessibility
