@@ -279,7 +279,7 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     if (Build.VERSION.SDK_INT >= 19 && keyInfo.key.keys[0] != null &&
         keyInfo.key.keys[0].getKind() == KeyValue.Kind.Modifier)
     {
-      node.setLiveRegion(AccessibilityNodeInfo.ACCESSIBILITY_LIVE_REGION_POLITE);
+      node.setLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
     }
 
     // Explicitly mark as important for accessibility
