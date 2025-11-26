@@ -213,7 +213,7 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
       // Provide a pane title to announce keyboard appearance (API 28+)
       if (Build.VERSION.SDK_INT >= 28)
       {
-        node.setPaneTitle("Keyboard");
+        node.setPaneTitle(_view.getContext().getString(R.string.a11y_pane_title_keyboard));
       }
 
       return node;
@@ -266,7 +266,7 @@ public class KeyboardAccessibilityDelegate extends AccessibilityNodeProvider
     node.setScreenReaderFocusable(true);
 
     // Provide role and state descriptions where possible
-    AccessibilityNodeInfoCompat.wrap(node).setRoleDescription("Keyboard key");
+    AccessibilityNodeInfoCompat.wrap(node).setRoleDescription(_view.getContext().getString(R.string.a11y_role_keyboard_key));
     if (Build.VERSION.SDK_INT >= 30 && keyInfo.key.keys[0] != null &&
         keyInfo.key.keys[0].getKind() == KeyValue.Kind.Modifier)
     {

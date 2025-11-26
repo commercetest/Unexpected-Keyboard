@@ -154,6 +154,11 @@
     <string name="pref_accessibility_enabled_summary">Announce key presses and gestures for TalkBack and other screen readers</string>
     <string name="pref_accessibility_verbose_title">Verbose mode</string>
     <string name="pref_accessibility_verbose_summary">Announce additional details like swipe directions and available actions</string>
+    <string name="a11y_pane_title_keyboard">Keyboard</string>
+    <string name="a11y_role_keyboard_key">Keyboard key</string>
+    <string name="a11y_state_locked">locked</string>
+    <string name="a11y_state_on">on</string>
+    <string name="a11y_state_off">off</string>
     <string name="pref_category_developer">Developer options</string>
     <string name="pref_instrumentation_enabled_title">Enable touch instrumentation</string>
     <string name="pref_instrumentation_enabled_summary">Log touch events and gestures for testing and debugging</string>

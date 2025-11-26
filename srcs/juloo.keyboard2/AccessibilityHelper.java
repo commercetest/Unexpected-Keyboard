@@ -2,6 +2,7 @@ package juloo.keyboard2;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -183,21 +184,7 @@ public class AccessibilityHelper
     }
 
     String modName = getKeyDescription(modifier);
-    String state;
-
-    if (locked)
-    {
-      state = "locked";
-    }
-    else if (latched)
-    {
-      state = "on";
-    }
-    else
-    {
-      state = "off";
-    }
-
+    String state = getModifierStateDescription(latched, locked);
     String announcement = modName + " " + state;
     announce(view, announcement);
   }
@@ -209,13 +196,13 @@ public class AccessibilityHelper
   {
     if (locked)
     {
-      return "locked";
+      return _context.getString(R.string.a11y_state_locked);
     }
     if (latched)
     {
-      return "on";
+      return _context.getString(R.string.a11y_state_on);
     }
-    return "off";
+    return _context.getString(R.string.a11y_state_off);
   }
 
   /**
@@ -262,15 +249,19 @@ public class AccessibilityHelper
 
     Log.d(TAG, "Announcing: " + announcement);
 
-    // Method 1: announceForAccessibility (API 16+)
-    view.announceForAccessibility(announcement);
-
-    // Method 2: Send AccessibilityEvent for broader compatibility
-    AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_ANNOUNCEMENT);
-    event.getText().add(announcement);
-    event.setClassName(view.getClass().getName());
-    event.setPackageName(view.getContext().getPackageName());
-    view.sendAccessibilityEventUnchecked(event);
+    // Prefer announceForAccessibility on modern devices; fall back to an event for older APIs.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
+    {
+      view.announceForAccessibility(announcement);
+    }
+    else
+    {
+      AccessibilityEvent event = AccessibilityEvent.obtain(AccessibilityEvent.TYPE_ANNOUNCEMENT);
+      event.getText().add(announcement);
+      event.setClassName(view.getClass().getName());
+      event.setPackageName(view.getContext().getPackageName());
+      view.sendAccessibilityEventUnchecked(event);
+    }
   }
 
   /**
@@ -293,9 +284,6 @@ public class AccessibilityHelper
     event.setPackageName(view.getContext().getPackageName());
     event.setEnabled(true);
     view.sendAccessibilityEventUnchecked(event);
-
-    // Also use announceForAccessibility as fallback
-    view.announceForAccessibility(announcement);
   }
 
   /**
