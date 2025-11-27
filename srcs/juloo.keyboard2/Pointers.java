@@ -32,7 +32,13 @@ public final class Pointers implements Handler.Callback
 
   public Pointers(IPointerEventHandler h, Config c)
   {
-    _longpress_handler = new Handler(this);
+    this(h, c, null);
+  }
+
+  /** Package-private constructor for testing with injectable Handler. */
+  Pointers(IPointerEventHandler h, Config c, Handler handler)
+  {
+    _longpress_handler = (handler != null) ? handler : new Handler(this);
     _handler = h;
     _config = c;
     _accessibilityHelper = null; // Will be set by setAccessibilityHelper
@@ -41,6 +47,34 @@ public final class Pointers implements Handler.Callback
   public void setAccessibilityHelper(AccessibilityHelper helper)
   {
     _accessibilityHelper = helper;
+  }
+
+  // State inspection methods for testing
+
+  /** Package-private method for testing. Returns the number of active pointers. */
+  int getActivePointerCount()
+  {
+    return _ptrs.size();
+  }
+
+  /** Package-private method for testing. Returns list of active pointer IDs (excluding latched). */
+  java.util.List<Integer> getActivePointerIds()
+  {
+    java.util.List<Integer> ids = new java.util.ArrayList<>();
+    for (Pointer p : _ptrs)
+    {
+      if (p.pointerId != -1) // Skip latched pointers
+      {
+        ids.add(p.pointerId);
+      }
+    }
+    return ids;
+  }
+
+  /** Package-private method for testing. Returns pointer by ID, or null if not found. */
+  Pointer getPointer(int pointerId)
+  {
+    return getPtr(pointerId);
   }
 
   /** Return the list of modifiers currently activated. */
@@ -348,6 +382,19 @@ public final class Pointers implements Handler.Callback
   }
 
   /**
+   * Calculate direction from delta x and delta y coordinates.
+   * Returns an int between [0] and [15] representing 16 sections of a circle,
+   * clockwise, starting at the top.
+   */
+  static int calculateDirection(float dx, float dy)
+  {
+    double a = Math.atan2(dy, dx) + Math.PI;
+    // a is between 0 and 2pi, 0 is pointing to the left
+    // add 12 to align 0 to the top
+    return ((int)(a * 8 / Math.PI) + 12) % 16;
+  }
+
+  /**
    * Get the key nearest to [direction] that is not key0. Take care
    * of applying [_handler.modifyKey] to the selected key in the same
    * operation to be sure to treat removed keys correctly.
@@ -410,12 +457,7 @@ public final class Pointers implements Handler.Callback
     }
     else
     { // Pointer is on a quadrant.
-      // See [getKeyAtDirection()] for the meaning. The starting point on the
-      // circle is the top direction.
-      double a = Math.atan2(dy, dx) + Math.PI;
-      // a is between 0 and 2pi, 0 is pointing to the left
-      // add 12 to align 0 to the top
-      int direction = ((int)(a * 8 / Math.PI) + 12) % 16;
+      int direction = calculateDirection(dx, dy);
       if (ptr.gesture == null)
       { // Gesture starts
 
@@ -560,11 +602,11 @@ public final class Pointers implements Handler.Callback
     return false;
   }
 
-  private static int uniqueTimeoutWhat = 0;
+  private int _nextTimeoutWhat = 0;
 
   private void startLongPress(Pointer ptr)
   {
-    int what = (uniqueTimeoutWhat++);
+    int what = (_nextTimeoutWhat++);
     ptr.timeoutWhat = what;
     _longpress_handler.sendEmptyMessageDelayed(what, _config.longPressTimeout);
   }
@@ -734,7 +776,7 @@ public final class Pointers implements Handler.Callback
     return new Pointer(p, k, v, x, y, m, flags);
   }
 
-  private static final class Pointer
+  static final class Pointer
   {
     /** -1 when latched. */
     public int pointerId;
