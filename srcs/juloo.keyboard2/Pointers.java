@@ -83,8 +83,8 @@ public final class Pointers implements Handler.Callback
     return getModifiers(false);
   }
 
-  /** When [skip_latched] is true, don't take flags of latched keys into account. */
-  private Modifiers getModifiers(boolean skip_latched)
+  /** When [skip_latched] is true, don't take flags of latched keys into account. Package-private for testing. */
+  Modifiers getModifiers(boolean skip_latched)
   {
     int n_ptrs = _ptrs.size();
     KeyValue[] mods = new KeyValue[n_ptrs];
